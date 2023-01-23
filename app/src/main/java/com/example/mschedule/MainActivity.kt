@@ -3,39 +3,152 @@ package com.example.mschedule
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.screen.*
 import com.example.mschedule.ui.theme.MScheduleTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MScheduleTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background) {
-                    Greeting("Android")
+                Surface {
+                    val navController = rememberNavController()
+                    val drawerState = rememberDrawerState(DrawerValue.Closed)
+                    val scope = rememberCoroutineScope()
+                    val openDrawer = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+                    ModalNavigationDrawer(
+                        drawerState = drawerState,
+                        gesturesEnabled = drawerState.isOpen,
+                        drawerContent = {
+                            Drawer(
+                                onDestinationClicked = { route ->
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
+                                    navController.navigate(route) {
+                                        popUpTo = navController.graph.startDestinationId
+                                        launchSingleTop = true
+                                    }
+                                }
+                            )
+                        }
+                    ) {
+                        NavHost(
+                            navController = navController,
+                            startDestination = "Main"
+                        ) {
+                            composable(route = "Main") {
+                                MainScreen(onSearchBarClick = {},
+                                    onAddScheduleClick = {},
+                                    onScheduleClick = {},
+                                    openDrawer = {
+                                        openDrawer()
+                                    })
+                            }
+                            composable(DrawerScreens.Home.route) {
+                                Home(
+                                    openDrawer = {
+                                        openDrawer()
+                                    }
+                                )
+                            }
+                            composable(DrawerScreens.Account.route) {
+                                Account(
+                                    openDrawer = {
+                                        openDrawer()
+                                    }
+                                )
+                            }
+                            composable(DrawerScreens.Help.route) {
+                                Help(
+                                    navController = navController
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
+fun MainPreview() {
     MScheduleTheme {
-        Greeting("Android")
+        Surface {
+            val navController = rememberNavController()
+            val drawerState = rememberDrawerState(DrawerValue.Closed)
+            val scope = rememberCoroutineScope()
+            val openDrawer = {
+                scope.launch {
+                    drawerState.open()
+                }
+            }
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                gesturesEnabled = drawerState.isOpen,
+                drawerContent = {
+                    Drawer(
+                        onDestinationClicked = { route ->
+                            scope.launch {
+                                drawerState.close()
+                            }
+                            navController.navigate(route) {
+                                popUpTo = navController.graph.startDestinationId
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            ) {
+                NavHost(
+                    navController = navController,
+                    startDestination = "Main"
+                ) {
+                    composable(route = "Main") {
+                        MainScreen(onSearchBarClick = {},
+                            onAddScheduleClick = {},
+                            onScheduleClick = {},
+                            openDrawer = {
+                                openDrawer()
+                            })
+                    }
+                    composable(DrawerScreens.Home.route) {
+                        Home(
+                            openDrawer = {
+                                openDrawer()
+                            }
+                        )
+                    }
+                    composable(DrawerScreens.Account.route) {
+                        Account(
+                            openDrawer = {
+                                openDrawer()
+                            }
+                        )
+                    }
+                    composable(DrawerScreens.Help.route) {
+                        Help(
+                            navController = navController
+                        )
+                    }
+                }
+            }
+        }
     }
 }
