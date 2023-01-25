@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 
 sealed class DrawerScreens(val title: String, val route: String) {
     object Main : DrawerScreens("Main", "Main")
+    object Add : DrawerScreens("Add", "Add")
+    object Edit : DrawerScreens("Edit", "Edit")
     object Home : DrawerScreens("Home", "home")
     object Account : DrawerScreens("Account", "account")
     object Help : DrawerScreens("Help", "help")

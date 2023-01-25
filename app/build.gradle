@@ -47,7 +47,12 @@ android {
 }
 
 
+
+
 dependencies {
+    implementation "com.google.accompanist:accompanist-insets:0.15.0"
+    implementation "com.google.accompanist:accompanist-insets-ui:0.15.0"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.15.0"
     implementation "androidx.compose.material3:material3:1.0.0-beta02"
     implementation('org.burnoutcrew.composereorderable:reorderable:0.9.6')
     implementation 'androidx.core:core-ktx:1.7.0'

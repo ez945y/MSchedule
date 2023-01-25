@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mschedule.entity.scheduleItemList
+import com.example.mschedule.entity.ScheduleItem
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -26,21 +26,26 @@ import java.util.*
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditScreen(
-    id:String= "1",
+fun CreateScreen(
+    ScheduleItemList: ScheduleItem = ScheduleItem(1),
     onSearchBarClick: () -> Unit,
     openDrawer: () -> Unit,
 ) {
-    val scheduleItem = scheduleItemList[id.toInt()]
     val formatter = DateTimeFormatter.ofPattern("yy/MM/dd", Locale.TAIWAN)
     val context = LocalContext.current
     var infos = listOf(
-        scheduleItem.member,
-        scheduleItem.schedule,
-        scheduleItem.tag,
-        scheduleItem.note
+        ScheduleItemList.member,
+        ScheduleItemList.schedule,
+        ScheduleItemList.tag,
+        ScheduleItemList.note
     )
-    var icons = listOf(
+    val placeholder = listOf(
+        "新增成員",
+        "設定行事曆",
+        ScheduleItemList.tag,"設定標籤",
+        ScheduleItemList.note,"新增備註"
+    )
+    val icons = listOf(
         Icons.Filled.AccountBox,
         Icons.Filled.MailOutline,
         Icons.Filled.Lock,
@@ -48,7 +53,7 @@ fun EditScreen(
     )
     Scaffold(
         topBar = {
-            MTopBar("編輯行程", onSearchBarClick, icon = "c", openDrawer)
+            MTopBar("新增行程", onSearchBarClick, icon = "c", openDrawer)
         },
         bottomBar = {
             MBottomBar()
@@ -70,10 +75,11 @@ fun EditScreen(
                             Icon(Icons.Filled.List,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.inverseSurface,
-                                modifier = Modifier.padding(top = 20.dp, start = 16.dp))
+                                modifier = Modifier.padding(top = 28.dp, start = 16.dp))
                             TextField(
-                                value = scheduleItem.title.value,
-                                onValueChange = { scheduleItem.title.value = it },
+                                value = ScheduleItemList.title.value,
+                                onValueChange = { ScheduleItemList.title.value = it },
+                                placeholder = { Text("新增標題") },
                                 textStyle = MaterialTheme.typography.titleLarge,
                             )
                         }
@@ -83,7 +89,7 @@ fun EditScreen(
                                     .clickable {}
                                     .padding(start = 15.dp, top = 28.dp),
                                 contentDescription = null)
-                            Text(text = scheduleItem.startTime.value.format(formatter),
+                            Text(text = ScheduleItemList.startTime.value.format(formatter),
                                 textAlign = TextAlign.Center,
                                 fontSize = 20.sp,
                                 modifier = Modifier
@@ -91,9 +97,9 @@ fun EditScreen(
                                     .clickable {
                                         datePicker(true,
                                             context,
-                                            scheduleItem.startTime.value,
+                                            ScheduleItemList.startTime.value,
                                             onDateSelect = {
-                                                scheduleItem.startTime.value = it
+                                                ScheduleItemList.startTime.value = it
                                             })
                                     }
                             )
@@ -102,7 +108,7 @@ fun EditScreen(
                                     .clickable {}
                                     .padding(top = 28.dp),
                                 contentDescription = null)
-                            Text(text = scheduleItem.endTime.value.format(formatter),
+                            Text(text = ScheduleItemList.endTime.value.format(formatter),
                                 textAlign = TextAlign.Center,
                                 fontSize = 20.sp,
                                 modifier = Modifier
@@ -110,9 +116,9 @@ fun EditScreen(
                                     .clickable {
                                         datePicker(true,
                                             context,
-                                            scheduleItem.endTime.value,
+                                            ScheduleItemList.endTime.value,
                                             onDateSelect = {
-                                                scheduleItem.endTime.value = it
+                                                ScheduleItemList.endTime.value = it
                                             })
                                     }
                             )
@@ -132,8 +138,8 @@ fun EditScreen(
                             .padding(top = 20.dp, start = 30.dp, end = 30.dp),
                         fontSize = 20.sp
                     )
-                    Switch(checked = scheduleItem.isAllDay.value,
-                        onCheckedChange = { scheduleItem.isAllDay.value = it },
+                    Switch(checked = ScheduleItemList.isAllDay.value,
+                        onCheckedChange = { ScheduleItemList.isAllDay.value = it },
                         modifier = Modifier.padding(start = 180.dp, top = 15.dp))
                 }
                 Row {
@@ -162,6 +168,7 @@ fun EditScreen(
                             TextField(
                                 value = info.value,
                                 onValueChange = { info.value = it },
+                                placeholder={ Text(text="${placeholder[idx]}")},
                                 textStyle = MaterialTheme.typography.titleSmall,
                             )
 
@@ -178,7 +185,7 @@ fun EditScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun EditPreview() {
+fun CreatePreview() {
     MScheduleTheme {
         Surface {
             EditScreen(
@@ -187,39 +194,6 @@ fun EditPreview() {
 
             }
 
-        }
-    }
-}
-
-
-@Composable
-fun DropDownTest(modifer:Modifier) {
-    var expanded = remember {
-        mutableStateOf(false)
-    }
-    var text = remember {mutableStateOf("永不")}
-    val items = listOf("永不", "每天", "每周", "每月", "每年")
-    Box(
-        modifier = modifer
-    ) {
-        Button(
-            onClick = {
-                expanded.value = true
-            },
-        ) {
-            Text(text = text.value)
-        }
-
-        DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
-            items.forEach { s ->
-                DropdownMenuItem(
-                    text = { Text(text = s)},
-                    onClick = {
-                        text.value = s
-                        expanded.value = false
-                    }
-                )
-            }
         }
     }
 }

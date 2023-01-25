@@ -8,21 +8,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.screen.*
 import com.example.mschedule.ui.theme.MScheduleTheme
+import com.example.mschedule.ui.theme.isLight
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             MScheduleTheme {
                 Surface {
+                    rememberSystemUiController().setStatusBarColor(
+                        Color.Transparent, darkIcons = MaterialTheme.colorScheme.isLight())
                     val navController = rememberNavController()
                     val drawerState = rememberDrawerState(DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
@@ -53,19 +61,28 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = "Main"
                         ) {
-                            composable(route = "Main") {
-                                MainScreen(onSearchBarClick = {},
+                            composable(route = DrawerScreens.Main.route) {
+                                MainScreen(
                                     onAddScheduleClick = {navController.navigate("Add")},
-                                    onScheduleClick = {navController.navigate("Add")},
+                                    navController = navController,
                                     openDrawer = {
                                         openDrawer()
                                     })
                             }
-                            composable(route = "Add") {
-                                EditScreen(onSearchBarClick = {navController.navigate("Main")},
+                            composable(route = DrawerScreens.Add.route) {
+                                CreateScreen(onSearchBarClick = {navController.navigate("Main")},
                                     openDrawer = {
                                         openDrawer()
                                     })
+                            }
+                            composable(route =DrawerScreens.Edit.route+"/{scheduleID}") { backStackEntry ->
+                                    EditScreen(
+                                        id= backStackEntry.arguments?.getString("scheduleID").orEmpty(),
+                                        onSearchBarClick = {navController.navigate("Main")},
+                                        openDrawer = {
+                                            openDrawer()
+                                        },
+                                    )
                             }
                             composable(DrawerScreens.Home.route) {
                                 Home(
