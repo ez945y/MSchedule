@@ -103,6 +103,14 @@ class MainActivity : ComponentActivity() {
                                     navController = navController
                                 )
                             }
+                            composable(DrawerScreens.Day.route+"/{dateID}") { backStackEntry ->
+                                DayScreen(
+                                    id = backStackEntry.arguments?.getString("dateID").orEmpty(),
+                                    navController = navController,openDrawer = {
+                                        openDrawer()
+                                    },
+                                )
+                            }
                         }
                     }
                 }

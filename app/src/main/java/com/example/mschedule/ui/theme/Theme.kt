@@ -90,5 +90,6 @@ fun MScheduleTheme(
     content = content
   )
 }
+
 @Composable
 fun ColorScheme.isLight() = this.background.luminance() > 0.5

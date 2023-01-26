@@ -234,7 +234,7 @@ fun DateItem(
             verticalAlignment = Alignment.CenterVertically) {
             itemsIndexed(week) { idx, date ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { }) {
+                    modifier = Modifier.clickable {navController.navigate("Day/$date")  }) {
                     Text(
                         text = date,
                         textAlign = TextAlign.Center,
@@ -264,7 +264,7 @@ fun MainPreview() {
         Surface {
             MainScreen(
                 onAddScheduleClick = { /*TODO*/ },
-                navController = rememberNavController()
+                navController = rememberNavController(),
             ) {
             }
 
