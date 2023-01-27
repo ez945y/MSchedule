@@ -1,6 +1,5 @@
 package com.example.mschedule.screen
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -9,15 +8,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.entity.ScheduleItem
+import com.example.mschedule.entity.db_Add
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -26,9 +26,9 @@ import java.util.*
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateScreen(
+fun AddScreen(
     ScheduleItemList: ScheduleItem = ScheduleItem(1),
-    onSearchBarClick: () -> Unit,
+    navController: NavController,
     openDrawer: () -> Unit,
 ) {
     val formatter = DateTimeFormatter.ofPattern("yy/MM/dd", Locale.TAIWAN)
@@ -42,8 +42,8 @@ fun CreateScreen(
     val placeholder = listOf(
         "新增成員",
         "設定行事曆",
-        ScheduleItemList.tag,"設定標籤",
-        ScheduleItemList.note,"新增備註"
+        "設定標籤",
+        "新增備註"
     )
     val icons = listOf(
         Icons.Filled.AccountBox,
@@ -53,10 +53,7 @@ fun CreateScreen(
     )
     Scaffold(
         topBar = {
-            MTopBar("新增行程", onSearchBarClick, icon = "c", openDrawer)
-        },
-        bottomBar = {
-            MBottomBar()
+            MTopBar("新增行程", {navController.popBackStack()  }, icon = "c", openDrawer)
         },
     ) { contentPadding ->
         Card(modifier = Modifier
@@ -175,7 +172,10 @@ fun CreateScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.size(40.dp))
+                Spacer(modifier = Modifier.size(20.dp))
+                Button(onClick = { db_Add(ScheduleItemList,context)}, modifier = Modifier.padding(start=150.dp)) {
+                    Text(text = "完成新增")
+                }
             }
         }
     }
@@ -188,8 +188,7 @@ fun CreateScreen(
 fun CreatePreview() {
     MScheduleTheme {
         Surface {
-            EditScreen(
-                onSearchBarClick = { /*TODO*/ },
+            AddScreen(ScheduleItem(1),rememberNavController()
             ) {
 
             }

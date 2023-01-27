@@ -13,20 +13,20 @@ data class ScheduleItem (
     var endTime: MutableState<LocalDate> =mutableStateOf(LocalDate.now()),
     var isAllDay: MutableState<Boolean> =mutableStateOf(false),
     var isRepeat: MutableState<Boolean> =mutableStateOf(false),
-    var member:MutableState<String> =mutableStateOf("新增成員"),
-    var schedule:MutableState<String> =mutableStateOf("設定行事曆"),
-    var tag:MutableState<String> =mutableStateOf("設定標籤"),
-    var note:MutableState<String> =mutableStateOf("新增備註"),
+    var member:MutableState<String> =mutableStateOf(""),
+    var schedule:MutableState<String> =mutableStateOf(""),
+    var tag:MutableState<String> =mutableStateOf(""),
+    var note:MutableState<String> =mutableStateOf(""),
 )
 
 
-class ScheduleViewModel : ViewModel() {
+class ScheduleViewModel(items: MutableList<ScheduleItem>) : ViewModel() {
 
-    private fun getSchedule(): SnapshotStateList<ScheduleItem> {
-        return scheduleItemList.toMutableStateList()
+    private fun getSchedule(items: MutableList<ScheduleItem>): SnapshotStateList<ScheduleItem> {
+        return items.toMutableStateList()
     }
 
-    private val _scheduleList = getSchedule().toMutableStateList()
+    private val _scheduleList = getSchedule(items).toMutableStateList()
     val scheduleList: List<ScheduleItem>
         get() = _scheduleList
 

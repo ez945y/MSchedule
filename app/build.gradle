@@ -47,8 +47,6 @@ android {
 }
 
 
-
-
 dependencies {
     implementation "com.google.accompanist:accompanist-insets:0.15.0"
     implementation "com.google.accompanist:accompanist-insets-ui:0.15.0"

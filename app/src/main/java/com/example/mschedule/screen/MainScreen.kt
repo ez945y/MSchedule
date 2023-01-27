@@ -26,10 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.mschedule.entity.Month
-import com.example.mschedule.entity.ScheduleItem
-import com.example.mschedule.entity.ScheduleViewModel
-import com.example.mschedule.entity.scheduleItemList
+import com.example.mschedule.entity.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate

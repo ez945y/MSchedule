@@ -17,6 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.entity.db_Add
 import com.example.mschedule.entity.scheduleItemList
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.time.format.DateTimeFormatter
@@ -28,9 +31,10 @@ import java.util.*
 @Composable
 fun EditScreen(
     id:String= "1",
-    onSearchBarClick: () -> Unit,
+    navController: NavController,
     openDrawer: () -> Unit,
-) {
+
+    ) {
     val scheduleItem = scheduleItemList[id.toInt()]
     val formatter = DateTimeFormatter.ofPattern("yy/MM/dd", Locale.TAIWAN)
     val context = LocalContext.current
@@ -40,6 +44,12 @@ fun EditScreen(
         scheduleItem.tag,
         scheduleItem.note
     )
+    val placeholder = listOf(
+        "新增成員",
+        "設定行事曆",
+        "設定標籤",
+        "新增備註"
+    )
     var icons = listOf(
         Icons.Filled.AccountBox,
         Icons.Filled.MailOutline,
@@ -48,10 +58,7 @@ fun EditScreen(
     )
     Scaffold(
         topBar = {
-            MTopBar("編輯行程", onSearchBarClick, icon = "c", openDrawer)
-        },
-        bottomBar = {
-            MBottomBar()
+            MTopBar("編輯行程", {navController.popBackStack()}, icon = "c", openDrawer)
         },
     ) { contentPadding ->
         Card(modifier = Modifier
@@ -162,13 +169,17 @@ fun EditScreen(
                             TextField(
                                 value = info.value,
                                 onValueChange = { info.value = it },
+                                placeholder={ Text(text="${placeholder[idx]}")},
                                 textStyle = MaterialTheme.typography.titleSmall,
                             )
 
                         }
                     }
                 }
-                Spacer(modifier = Modifier.size(40.dp))
+                Spacer(modifier = Modifier.size(20.dp))
+                Button(onClick = { }, modifier = Modifier.padding(start=150.dp)) {
+                    Text(text = "完成編輯")
+                }
             }
         }
     }
@@ -182,11 +193,8 @@ fun EditPreview() {
     MScheduleTheme {
         Surface {
             EditScreen(
-                onSearchBarClick = { /*TODO*/ },
-            ) {
-
-            }
-
+                "1",rememberNavController()
+            ) {}
         }
     }
 }
