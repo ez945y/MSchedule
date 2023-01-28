@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +21,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.entity.ScheduleItem
 import com.example.mschedule.entity.db_Add
 import com.example.mschedule.ui.theme.MScheduleTheme
+import java.text.SimpleDateFormat
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -27,17 +31,25 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
-    ScheduleItemList: ScheduleItem = ScheduleItem(1),
+    ScheduleItem:ScheduleItem = ScheduleItem(777),
     navController: NavController,
+    dateId: String = "2023-01-28",
     openDrawer: () -> Unit,
 ) {
+    val sdf = SimpleDateFormat("yyyy-MM-dd")
     val formatter = DateTimeFormatter.ofPattern("yy/MM/dd", Locale.TAIWAN)
     val context = LocalContext.current
-    var infos = listOf(
-        ScheduleItemList.member,
-        ScheduleItemList.schedule,
-        ScheduleItemList.tag,
-        ScheduleItemList.note
+    var date = remember {
+        mutableStateOf(sdf.parse(dateId).toInstant().atZone(
+            ZoneId.systemDefault()).toLocalDate())
+    }
+    ScheduleItem.startTime.value = date.value
+    ScheduleItem.endTime.value = date.value
+    val infos = listOf(
+        ScheduleItem.member,
+        ScheduleItem.schedule,
+        ScheduleItem.tag,
+        ScheduleItem.note
     )
     val placeholder = listOf(
         "新增成員",
@@ -67,15 +79,15 @@ fun AddScreen(
                     .fillMaxWidth()
                     .size(0.dp, 185.dp)
                     .padding(start = 16.dp, end = 16.dp, top = 20.dp)) {
-                    Column() {
+                    Column {
                         Row {
                             Icon(Icons.Filled.List,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.inverseSurface,
                                 modifier = Modifier.padding(top = 28.dp, start = 16.dp))
                             TextField(
-                                value = ScheduleItemList.title.value,
-                                onValueChange = { ScheduleItemList.title.value = it },
+                                value = ScheduleItem.title.value,
+                                onValueChange = { ScheduleItem.title.value = it },
                                 placeholder = { Text("新增標題") },
                                 textStyle = MaterialTheme.typography.titleLarge,
                             )
@@ -86,7 +98,7 @@ fun AddScreen(
                                     .clickable {}
                                     .padding(start = 15.dp, top = 28.dp),
                                 contentDescription = null)
-                            Text(text = ScheduleItemList.startTime.value.format(formatter),
+                            Text(text = ScheduleItem.startTime.value.format(formatter),
                                 textAlign = TextAlign.Center,
                                 fontSize = 20.sp,
                                 modifier = Modifier
@@ -94,9 +106,9 @@ fun AddScreen(
                                     .clickable {
                                         datePicker(true,
                                             context,
-                                            ScheduleItemList.startTime.value,
+                                            ScheduleItem.startTime.value,
                                             onDateSelect = {
-                                                ScheduleItemList.startTime.value = it
+                                                ScheduleItem.startTime.value = it
                                             })
                                     }
                             )
@@ -105,7 +117,7 @@ fun AddScreen(
                                     .clickable {}
                                     .padding(top = 28.dp),
                                 contentDescription = null)
-                            Text(text = ScheduleItemList.endTime.value.format(formatter),
+                            Text(text = ScheduleItem.endTime.value.format(formatter),
                                 textAlign = TextAlign.Center,
                                 fontSize = 20.sp,
                                 modifier = Modifier
@@ -113,9 +125,9 @@ fun AddScreen(
                                     .clickable {
                                         datePicker(true,
                                             context,
-                                            ScheduleItemList.endTime.value,
+                                            ScheduleItem.endTime.value,
                                             onDateSelect = {
-                                                ScheduleItemList.endTime.value = it
+                                                ScheduleItem.endTime.value = it
                                             })
                                     }
                             )
@@ -135,8 +147,8 @@ fun AddScreen(
                             .padding(top = 20.dp, start = 30.dp, end = 30.dp),
                         fontSize = 20.sp
                     )
-                    Switch(checked = ScheduleItemList.isAllDay.value,
-                        onCheckedChange = { ScheduleItemList.isAllDay.value = it },
+                    Switch(checked = ScheduleItem.isAllDay.value,
+                        onCheckedChange = { ScheduleItem.isAllDay.value = it },
                         modifier = Modifier.padding(start = 180.dp, top = 15.dp))
                 }
                 Row {
@@ -165,7 +177,7 @@ fun AddScreen(
                             TextField(
                                 value = info.value,
                                 onValueChange = { info.value = it },
-                                placeholder={ Text(text="${placeholder[idx]}")},
+                                placeholder={ Text(text="$placeholder[idx]")},
                                 textStyle = MaterialTheme.typography.titleSmall,
                             )
 
@@ -173,7 +185,8 @@ fun AddScreen(
                     }
                 }
                 Spacer(modifier = Modifier.size(20.dp))
-                Button(onClick = { db_Add(ScheduleItemList,context)}, modifier = Modifier.padding(start=150.dp)) {
+                Button(onClick = { db_Add(ScheduleItem,context)
+                    navController.popBackStack()}, modifier = Modifier.padding(start=150.dp)) {
                     Text(text = "完成新增")
                 }
             }
@@ -188,11 +201,8 @@ fun AddScreen(
 fun CreatePreview() {
     MScheduleTheme {
         Surface {
-            AddScreen(ScheduleItem(1),rememberNavController()
-            ) {
-
-            }
-
+            AddScreen(ScheduleItem(777),rememberNavController()
+            ){}
         }
     }
 }

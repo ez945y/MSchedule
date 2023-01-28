@@ -1,6 +1,5 @@
 package com.example.mschedule.screen
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -19,8 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.mschedule.entity.db_Add
-import com.example.mschedule.entity.scheduleItemList
+import com.example.mschedule.entity.tempItemList
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -35,10 +33,10 @@ fun EditScreen(
     openDrawer: () -> Unit,
 
     ) {
-    val scheduleItem = scheduleItemList[id.toInt()]
+    val scheduleItem = tempItemList[id.toInt()]
     val formatter = DateTimeFormatter.ofPattern("yy/MM/dd", Locale.TAIWAN)
     val context = LocalContext.current
-    var infos = listOf(
+    val infos = listOf(
         scheduleItem.member,
         scheduleItem.schedule,
         scheduleItem.tag,
@@ -50,7 +48,7 @@ fun EditScreen(
         "設定標籤",
         "新增備註"
     )
-    var icons = listOf(
+    val icons = listOf(
         Icons.Filled.AccountBox,
         Icons.Filled.MailOutline,
         Icons.Filled.Lock,
@@ -72,7 +70,7 @@ fun EditScreen(
                     .fillMaxWidth()
                     .size(0.dp, 185.dp)
                     .padding(start = 16.dp, end = 16.dp, top = 20.dp)) {
-                    Column() {
+                    Column{
                         Row {
                             Icon(Icons.Filled.List,
                                 contentDescription = null,
@@ -169,7 +167,7 @@ fun EditScreen(
                             TextField(
                                 value = info.value,
                                 onValueChange = { info.value = it },
-                                placeholder={ Text(text="${placeholder[idx]}")},
+                                placeholder={ Text(text=placeholder[idx])},
                                 textStyle = MaterialTheme.typography.titleSmall,
                             )
 
@@ -201,14 +199,14 @@ fun EditPreview() {
 
 
 @Composable
-fun DropDownTest(modifer:Modifier) {
+fun DropDownTest(modifier:Modifier) {
     var expanded = remember {
         mutableStateOf(false)
     }
     var text = remember {mutableStateOf("永不")}
     val items = listOf("永不", "每天", "每周", "每月", "每年")
     Box(
-        modifier = modifer
+        modifier = modifier
     ) {
         Button(
             onClick = {

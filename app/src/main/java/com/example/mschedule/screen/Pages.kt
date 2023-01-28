@@ -19,10 +19,10 @@ fun Home(openDrawer: () -> Unit) {
             AlertDialog(
                 onDismissRequest = {
                     // 點擊 彈出視窗 外的區域觸發
-                    showAlertDialog = false;
+                    showAlertDialog = false
                 },
                 title = {
-                    Text("RuyutAlertDialog")
+                    Text("Run AlertDialog")
                 },
                 text = {
                     Text("This is a dialog.")

@@ -1,10 +1,12 @@
 package com.example.mschedule.screen
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
@@ -20,9 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.mschedule.entity.ScheduleItem
-import com.example.mschedule.entity.ScheduleViewModel
-import com.example.mschedule.entity.db_Select
+import com.example.mschedule.entity.*
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -31,7 +31,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayScreen(
-    id: String = "1",
+    dateId: String = "2023-01-28",
     navController: NavController,
     openDrawer: () -> Unit,
 ) {
@@ -39,18 +39,20 @@ fun DayScreen(
     val formatter = DateTimeFormatter.ofPattern("MM月dd日 E", Locale.TAIWAN)
     val context = LocalContext.current
     var date = remember {
-        mutableStateOf(sdf.parse("2023-01-$id").toInstant().atZone(
+        mutableStateOf(sdf.parse(dateId).toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate())
     }
+    var flag = remember { mutableStateOf(true) }
+    if (flag.value) {
+        db_Select(date.value, context)
+        flag.value = false
+    }
 
-    val scheduleVM= ScheduleViewModel(db_Select(date.value,context,))
+    val scheduleVM = ScheduleViewModel()
     val scheduleList = scheduleVM.scheduleList
     Scaffold(
         topBar = {
-            MTopBar("行程安排", {navController.popBackStack() }, icon = "c", openDrawer)
-        },
-        bottomBar = {
-            MBottomBar()
+            MTopBar("行程安排", { navController.popBackStack() }, icon = "c", openDrawer)
         },
     ) { contentPadding ->
         Card(modifier = Modifier
@@ -67,7 +69,7 @@ fun DayScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = "${date.value.format(formatter)}",
+                    Text(text = date.value.format(formatter),
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
@@ -82,13 +84,13 @@ fun DayScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .padding(end = 20.dp)
-                            .clickable { navController.navigate("Add") })
+                            .clickable { navController.navigate("Add/$dateId") })
                 }
                 if (scheduleList.isEmpty()) {
                     Button(modifier = Modifier
-                        .padding(top = 100.dp, start = 50.dp),
-                        onClick = { navController.navigate("Add") }) {
-                        Text("Add Schedule")
+                        .padding(top = 200.dp, start = 140.dp),
+                        onClick = { navController.navigate("Add/$dateId") }) {
+                        Text("新增行程")
                     }
                 } else {
                     Divider(color = MaterialTheme.colorScheme.secondary,
@@ -97,9 +99,9 @@ fun DayScreen(
                             .padding(top = 4.dp)
                             .padding(horizontal = 8.dp))
                     LazyColumn(modifier = Modifier.padding(bottom = 20.dp)) {
-                        items(scheduleList) { schedule ->
-                            ScheduleItemDisplay(schedule, navController)
-
+                        itemsIndexed(scheduleList) { idx,schedule ->
+                            ScheduleItemDisplay(schedule, navController,context,idx
+                            ) { scheduleVM.deleteSchedule(it) }
                         }
                     }
 
@@ -110,7 +112,7 @@ fun DayScreen(
 }
 
 @Composable
-fun ScheduleItemDisplay(schedule: ScheduleItem, navController: NavController) {
+fun ScheduleItemDisplay(schedule: ScheduleItem, navController: NavController,context: Context,idx:Int,scheduleVM:(Int)->Unit ) {
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(top = 8.dp)) {
@@ -122,16 +124,27 @@ fun ScheduleItemDisplay(schedule: ScheduleItem, navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "口 ${schedule.title.value}",
+                text = "$schedule.title.value",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 20.dp),
             )
-            Icon(Icons.Filled.Edit,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(24.dp)
-                    .clickable { navController.navigate("Edit/${schedule.id}") })
+            Row {
+                Icon(Icons.Filled.Delete,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .size(24.dp)
+                        .clickable {
+                            db_delete(id = schedule.id, context = context)
+                            scheduleVM(idx)
+                        })
+                Icon(Icons.Filled.Edit,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .size(24.dp)
+                        .clickable { navController.navigate("Edit/$idx") })
+            }
         }
 
     }
@@ -140,5 +153,5 @@ fun ScheduleItemDisplay(schedule: ScheduleItem, navController: NavController) {
 @Preview
 @Composable
 fun DayPreview() {
-    DayScreen("1", rememberNavController(), {})
+    DayScreen("1", rememberNavController()) {}
 }

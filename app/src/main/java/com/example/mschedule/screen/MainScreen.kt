@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +22,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.entity.*
@@ -55,7 +53,6 @@ fun datePicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    scheduleVM: ScheduleViewModel = viewModel(),
     onAddScheduleClick: () -> Unit,
     navController:NavController,
     openDrawer: () -> Unit,
@@ -66,7 +63,8 @@ fun MainScreen(
     val textState = remember { mutableStateOf(TextFieldValue("")) }
     var showAlertDialog by remember { mutableStateOf(false) }
     val systemUiController = rememberSystemUiController() //設定導航欄透明色
-    val scheduleList = scheduleVM.scheduleList
+    val year = "2023"
+    val moon = "1"
     systemUiController.setNavigationBarColor(Color.Transparent, darkIcons = false)
     Scaffold(
         topBar = {
@@ -143,9 +141,10 @@ fun MainScreen(
                                 modifier = Modifier
                                     .padding(top = 4.dp)
                                     .padding(horizontal = 8.dp))
-                            DateItem(m, navController)
+                            DateItem(m, navController,year,moon)
                         }
                     }
+                    /*
                     Card(modifier = Modifier.padding(start = 130.dp, top = 140.dp),
                         border = BorderStroke(1.dp, Color.Black),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
@@ -174,6 +173,7 @@ fun MainScreen(
                                 .fillMaxWidth()
                                 .clickable {navController.navigate("Edit"+"/"+"${scheduleList[2].id}") })
                     }
+                     */
 
                 }
                 Divider(color = MaterialTheme.colorScheme.secondary,
@@ -222,6 +222,8 @@ fun WeekItem(
 fun DateItem(
     week: List<String>,
     navController:NavController,
+    year:String,
+    moon:String,
 ) {
     Card {
         LazyRow(modifier = Modifier
@@ -231,7 +233,7 @@ fun DateItem(
             verticalAlignment = Alignment.CenterVertically) {
             itemsIndexed(week) { idx, date ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable {navController.navigate("Day/$date")  }) {
+                    modifier = Modifier.clickable {navController.navigate("Day/$year-$moon-$date")  }) {
                     Text(
                         text = date,
                         textAlign = TextAlign.Center,
@@ -242,7 +244,7 @@ fun DateItem(
                             Color.Unspecified
                         }
                     )
-                    Column() {
+                    Column {
                         Box(modifier = Modifier.size(40.dp, 56.dp))
                     }
 
@@ -253,7 +255,6 @@ fun DateItem(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun MainPreview() {

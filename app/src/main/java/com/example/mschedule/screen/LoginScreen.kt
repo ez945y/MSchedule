@@ -109,7 +109,7 @@ fun LoginScreen(registerClick: () -> Unit) {
 fun LoginPreview() {
     MScheduleTheme {
         Surface {
-            LoginScreen({})
+            LoginScreen {}
         }
     }
 }

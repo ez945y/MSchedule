@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.mschedule.ui.theme.MScheduleTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +49,7 @@ fun RegisterScreen(back: () -> Unit) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Closee Icon",
+                        contentDescription = "Close Icon",
                         modifier = Modifier.padding(bottom=15.dp)
                     )
                 }

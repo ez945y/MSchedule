@@ -22,6 +22,7 @@ import com.example.mschedule.screen.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import com.example.mschedule.ui.theme.isLight
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -74,9 +75,10 @@ class MainActivity : ComponentActivity() {
                                         openDrawer()
                                     })
                             }
-                            composable(route = DrawerScreens.Add.route) {
+                            composable(route = DrawerScreens.Add.route+"/{dateID}") {backStackEntry ->
                                 AddScreen(ScheduleItem(1),
                                     navController = navController,
+                                    dateId = backStackEntry.arguments?.getString("dateID").orEmpty(),
                                     openDrawer = {
                                         openDrawer()
                                     })
@@ -110,7 +112,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(DrawerScreens.Day.route+"/{dateID}") { backStackEntry ->
                                 DayScreen(
-                                    id = backStackEntry.arguments?.getString("dateID").orEmpty(),
+                                    dateId = backStackEntry.arguments?.getString("dateID").orEmpty(),
                                     navController = navController,openDrawer = {
                                         openDrawer()
                                     },

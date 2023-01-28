@@ -57,6 +57,9 @@ private const val SQL_CREATE_ENTRIES2 =
 private const val SQL_DELETE_ENTRIES =
     "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry.TABLE_NAME}"
 
+private const val SQL_DELETE_ENTRIES2 =
+    "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry2.TABLE_NAME}"
+
 
 class FeedReaderDbHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -69,6 +72,7 @@ class FeedReaderDbHelper(context: Context) :
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
         db.execSQL(SQL_DELETE_ENTRIES)
+        db.execSQL(SQL_DELETE_ENTRIES2)
         onCreate(db)
     }
 
@@ -86,7 +90,8 @@ class FeedReaderDbHelper(context: Context) :
 fun db_Add(si: ScheduleItem, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val wdb = dbHelper.writableDatabase
-
+    //wdb.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry2.TABLE_NAME}")
+    //wdb.execSQL(SQL_CREATE_ENTRIES2)
     val values = ContentValues().apply {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime, si.startTime.value.toString())
@@ -99,41 +104,45 @@ fun db_Add(si: ScheduleItem, context: Context) {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_note, si.note.value)
 
     }
-    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values)
-
-
+    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
     //Text( newRowId.toString())
     //val c:cursor = db.rawQuery("SELECT * FROM $DataBaseTable", null)
 }
+fun db_delete(id:Int, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val wdb = dbHelper.writableDatabase
+    wdb.execSQL("DELETE FROM itemList WHERE itemList._ID = $id;")
+}
 
-fun db_Select(date: LocalDate, context: Context) :MutableList<ScheduleItem>{
+fun db_Select(date: LocalDate, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery("SELECT * FROM itemList WHERE $date > itemList.startTime AND $date < itemList.startTime ",
+        rdb.rawQuery("SELECT * FROM itemList WHERE itemList.startTime ='$date'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
             null)
-    var items = mutableListOf<ScheduleItem>()
-    with(c) {
-        while (moveToNext()) {
-            //val itemId = getLong(getColumnIndexOrThrow(BaseColumns._ID))
-            //itemIds.add(itemId)
-            var item = ScheduleItem(id = getString(0).toInt())
-            item.title.value = getString(1).orEmpty()
-            item.startTime.value = sdf.parse(getString(2)).toInstant().atZone(
-                ZoneId.systemDefault()).toLocalDate()
-            item.endTime.value = sdf.parse(getString(3)).toInstant().atZone(
-                ZoneId.systemDefault()).toLocalDate()
-            item.isAllDay.value = getInt(4) > 0
-            item.isRepeat.value = getInt(5) > 0
-            item.member.value = getString(6).orEmpty()
-            item.schedule.value = getString(7).orEmpty()
-            item.tag.value = getString(8).orEmpty()
-            item.note.value = getString(9).orEmpty()
-            items.add(item)
+    tempItemList.removeAll(tempItemList)
+    if (c.count != 0) {
+        with(c) {
+            while (moveToNext()) {
+                //val itemId = getLong(getColumnIndexOrThrow(BaseColumns._ID))
+                //itemIds.add(itemId)
+                var item = ScheduleItem(id = getString(0).toInt())
+                item.title.value = getString(1).orEmpty()
+                item.startTime.value = sdf.parse(getString(2)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+                item.endTime.value = sdf.parse(getString(3)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+                item.isAllDay.value = getInt(4) > 0
+                item.isRepeat.value = getInt(5) > 0
+                item.member.value = getString(6).orEmpty()
+                item.schedule.value = getString(7).orEmpty()
+                item.tag.value = getString(8).orEmpty()
+                item.note.value = getString(9).orEmpty()
+                tempItemList.add(item)
+            }
         }
     }
     c.close()
-    return items
 }
 
 /*
