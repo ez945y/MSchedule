@@ -14,3 +14,5 @@ https://www.geeksforgeeks.org/date-picker-in-android-using-jetpack-compose/
 https://www.gushiciku.cn/pl/abC0/zh-tw
 
 https://blog.csdn.net/sinat_38184748/article/details/119345811
+
+https://developer.android.com/jetpack/compose/gestures?hl=zh-tw#multitouch
