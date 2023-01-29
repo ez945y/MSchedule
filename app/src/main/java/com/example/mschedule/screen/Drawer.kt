@@ -13,14 +13,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 sealed class DrawerScreens(val title: String, val route: String) {
-    object Main : DrawerScreens("Main", "Main")
+    object Main : DrawerScreens("行事曆", "Main")
     object Add : DrawerScreens("Add", "Add")
     object Edit : DrawerScreens("Edit", "Edit")
-    object Home : DrawerScreens("Home", "home")
-    object Account : DrawerScreens("Account", "account")
-    object Help : DrawerScreens("Help", "help")
+    object Home : DrawerScreens("測試", "home")
+    object Account : DrawerScreens("會員", "account")
+    object Help : DrawerScreens("幫助", "help")
     object Day : DrawerScreens("Day", "Day")
-    object Login : DrawerScreens("Login", "Login")
+    object Login : DrawerScreens("會員", "Login")
     object Register : DrawerScreens("Register", "Register")
 }
 

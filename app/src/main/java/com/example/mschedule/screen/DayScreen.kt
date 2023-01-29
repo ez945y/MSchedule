@@ -9,12 +9,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -80,7 +82,7 @@ fun DayScreen(
                                 })
                             }
                     )
-                    Icon(Icons.Outlined.Add,
+                    Icon(Icons.Outlined.AddCircle,
                         contentDescription = null,
                         modifier = Modifier
                             .padding(end = 20.dp)
@@ -88,9 +90,12 @@ fun DayScreen(
                 }
                 if (scheduleList.isEmpty()) {
                     Button(modifier = Modifier
-                        .padding(top = 200.dp, start = 140.dp),
+                        .padding(top = 200.dp, start = 120.dp),
                         onClick = { navController.navigate("Add/$dateId") }) {
-                        Text("新增行程")
+                        Icon(Icons.Outlined.AddCircle,
+                            contentDescription = null,
+                        modifier = Modifier.padding(end = 15.dp))
+                        Text("新增行程",modifier = Modifier.padding(end = 5.dp).padding(vertical = 10.dp))
                     }
                 } else {
                     Divider(color = MaterialTheme.colorScheme.secondary,
@@ -124,7 +129,7 @@ fun ScheduleItemDisplay(schedule: ScheduleItem, navController: NavController,con
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "$schedule.title.value",
+                text = schedule.title.value,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 20.dp),
             )

@@ -13,9 +13,9 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MTopBar(
-    title:String,
+    title: String,
     onSearchBarClick: () -> Unit,
-    icon:String="s",
+    icon: String = "s",
     onButtonClicked: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
@@ -42,13 +42,13 @@ fun MTopBar(
 }
 
 @Composable
-fun MBottomBar() {
+fun MBottomBar(onAddScheduleClick:()->Unit) {
     BottomAppBar {
         IconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
             Icon(Icons.Filled.Edit, null)
         }
-        IconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
-            Icon(Icons.Filled.Build, null)
+        IconButton(onClick = { onAddScheduleClick()}, modifier = Modifier.weight(1f)) {
+            Icon(Icons.Filled.Add, null)
         }
         IconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
             Icon(Icons.Filled.Share, null)

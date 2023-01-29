@@ -114,6 +114,17 @@ fun db_delete(id:Int, context: Context) {
     wdb.execSQL("DELETE FROM itemList WHERE itemList._ID = $id;")
 }
 
+fun db_Check(date: LocalDate, context: Context):Boolean {
+    val dbHelper = FeedReaderDbHelper(context)
+    val rdb = dbHelper.readableDatabase
+    val c: Cursor =
+        rdb.rawQuery("SELECT * FROM itemList WHERE itemList.startTime ='$date'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+            null)
+    if (c.count > 0){
+        return true
+    }
+    return false
+}
 fun db_Select(date: LocalDate, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase

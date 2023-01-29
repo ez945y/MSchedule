@@ -5,6 +5,9 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -28,6 +31,7 @@ import com.example.mschedule.entity.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -53,26 +57,49 @@ fun datePicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    onAddScheduleClick: () -> Unit,
-    navController:NavController,
+    navController: NavController,
     openDrawer: () -> Unit,
 ) {
     val localDate = remember { mutableStateOf(LocalDate.now()) }
     val formatter = DateTimeFormatter.ofPattern("yyyy年MM月", Locale.TAIWAN)
+    val formatterMonth = DateTimeFormatter.ofPattern("MM", Locale.TAIWAN)
     val context = LocalContext.current
     val textState = remember { mutableStateOf(TextFieldValue("")) }
     var showAlertDialog by remember { mutableStateOf(false) }
     val systemUiController = rememberSystemUiController() //設定導航欄透明色
     val year = "2023"
-    val moon = "1"
+    val monthNum = remember {
+        mutableStateOf(localDate.value.format(formatterMonth).toInt())
+    }
+    val months = Months()
+    val month = months.getMoon(monthNum.value)
+
+    val horizontalCount = remember {
+        mutableStateOf(0.0)
+    }
+    val state = rememberScrollableState {
+        horizontalCount.value += it
+        if(horizontalCount.value<-400.0 && monthNum.value<12){
+            monthNum.value+=1
+            horizontalCount.value = 0.0
+
+        }
+        if(horizontalCount.value>400.0 && monthNum.value>1){
+            monthNum.value-=1
+            horizontalCount.value = 0.0
+        }
+        it
+    }
     systemUiController.setNavigationBarColor(Color.Transparent, darkIcons = false)
     Scaffold(
         topBar = {
             if (showAlertDialog) {
                 textState.value = TextFieldValue("")
                 Column {
-                    Card(colors =CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                        Spacer(modifier = Modifier.fillMaxWidth().size(0.dp,37.dp))
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                        Spacer(modifier = Modifier
+                            .fillMaxWidth()
+                            .size(0.dp, 37.dp))
                     }
                     SearchScreen(textState) { showAlertDialog = false }
                 }
@@ -80,13 +107,12 @@ fun MainScreen(
                 MTopBar("日常", { showAlertDialog = true }, "s", openDrawer)
             }
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { onAddScheduleClick() }, content = {
-                Icon(Icons.Filled.Add, null)
-            })
-        },
         bottomBar = {
-            MBottomBar()
+            MBottomBar(onAddScheduleClick = {
+                navController.navigate("Add/${
+                    localDate.value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                }")
+            })
         },
     ) { contentPadding ->
         Box(modifier = Modifier
@@ -110,7 +136,7 @@ fun MainScreen(
                         Icon(Icons.Filled.ArrowBack,
                             modifier = Modifier.clickable {},
                             contentDescription = null)
-                        Text(text = localDate.value.format(formatter),
+                        Text(text = "2023年 ${monthNum.value} 月",
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .padding(start = 30.dp, end = 30.dp)
@@ -132,50 +158,32 @@ fun MainScreen(
                         .padding(horizontal = 18.dp))
                 WeekItem()
                 //日曆
-                val months = Month()
-                Box {
-                    LazyColumn(modifier = Modifier.padding(horizontal = 8.dp)) {
-                        items(months.m) { m ->
-                            Divider(color = MaterialTheme.colorScheme.secondary,
-                                thickness = 1.dp,
-                                modifier = Modifier
-                                    .padding(top = 4.dp)
-                                    .padding(horizontal = 8.dp))
-                            DateItem(m, navController,year,moon)
-                        }
-                    }
-                    /*
-                    Card(modifier = Modifier.padding(start = 130.dp, top = 140.dp),
-                        border = BorderStroke(1.dp, Color.Black),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-                    ) {
-                        Text("${scheduleList[0].title.value}",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.size(80.dp,30.dp).clickable {navController.navigate("Edit"+"/"+"${scheduleList[0].id}") })
-                    }
-                    Card(modifier = Modifier.padding(top = 45.dp, start = 65.dp, end = 65.dp),
-                        border = BorderStroke(1.dp, Color.Black),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-                    ) {
-                        Text("${scheduleList[1].title.value}",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {navController.navigate("Edit"+"/"+"${scheduleList[1].id}") })
-                    }
-                    Card(modifier = Modifier.padding(top = 320.dp, start = 165.dp, end = 65.dp),
-                        border = BorderStroke(1.dp, Color.Black),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-                    ) {
-                        Text("${scheduleList[2].title.value}",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {navController.navigate("Edit"+"/"+"${scheduleList[2].id}") })
-                    }
-                     */
 
+                LazyColumn(modifier = Modifier.padding(horizontal = 8.dp).scrollable(
+                    state = state, orientation = Orientation.Horizontal,
+                )) {
+                    items(month) { m ->
+                        Divider(color = MaterialTheme.colorScheme.secondary,
+                            thickness = 1.dp,
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .padding(horizontal = 8.dp))
+                        DateItem(m, navController, year, monthNum.value.toString(), context)
+                    }
                 }
+                /*
+                Card(modifier = Modifier.padding(top = 320.dp, start = 165.dp, end = 65.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text("${scheduleList[2].title.value}",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {navController.navigate("Edit"+"/"+"${scheduleList[2].id}") })
+                }
+                 */
+
                 Divider(color = MaterialTheme.colorScheme.secondary,
                     thickness = 1.dp,
                     modifier = Modifier
@@ -221,9 +229,10 @@ fun WeekItem(
 @Composable
 fun DateItem(
     week: List<String>,
-    navController:NavController,
-    year:String,
-    moon:String,
+    navController: NavController,
+    year: String,
+    month: String,
+    context: Context,
 ) {
     Card {
         LazyRow(modifier = Modifier
@@ -233,7 +242,7 @@ fun DateItem(
             verticalAlignment = Alignment.CenterVertically) {
             itemsIndexed(week) { idx, date ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable {navController.navigate("Day/$year-$moon-$date")  }) {
+                    modifier = Modifier.clickable { navController.navigate("Day/$year-$month-$date") }) {
                     Text(
                         text = date,
                         textAlign = TextAlign.Center,
@@ -245,7 +254,14 @@ fun DateItem(
                         }
                     )
                     Column {
-                        Box(modifier = Modifier.size(40.dp, 56.dp))
+                        Box(modifier = Modifier.size(40.dp, 56.dp),
+                            contentAlignment = Alignment.Center) {
+                            if (db_Check(sdf.parse("$year-$month-$date").toInstant().atZone(
+                                    ZoneId.systemDefault()).toLocalDate(), context)
+                            ) {
+                                Icon(Icons.Filled.Done, null)
+                            }
+                        }
                     }
 
                 }
@@ -261,7 +277,6 @@ fun MainPreview() {
     MScheduleTheme {
         Surface {
             MainScreen(
-                onAddScheduleClick = { /*TODO*/ },
                 navController = rememberNavController(),
             ) {
             }

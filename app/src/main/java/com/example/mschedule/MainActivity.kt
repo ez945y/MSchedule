@@ -69,7 +69,6 @@ class MainActivity : ComponentActivity() {
                         ) {
                             composable(route = DrawerScreens.Main.route) {
                                 MainScreen(
-                                    onAddScheduleClick = {navController.navigate("Add")},
                                     navController = navController,
                                     openDrawer = {
                                         openDrawer()
@@ -107,7 +106,6 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(DrawerScreens.Help.route) {
                                 Help(
-                                    navController = navController
                                 )
                             }
                             composable(DrawerScreens.Day.route+"/{dateID}") { backStackEntry ->

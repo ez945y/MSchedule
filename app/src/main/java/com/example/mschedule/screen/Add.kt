@@ -177,7 +177,7 @@ fun AddScreen(
                             TextField(
                                 value = info.value,
                                 onValueChange = { info.value = it },
-                                placeholder={ Text(text="$placeholder[idx]")},
+                                placeholder={ Text(text=placeholder[idx])},
                                 textStyle = MaterialTheme.typography.titleSmall,
                             )
 
