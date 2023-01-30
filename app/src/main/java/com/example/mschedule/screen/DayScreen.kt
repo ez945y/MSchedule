@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.entity.*
+import com.example.myapplication7.R
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -94,20 +97,29 @@ fun DayScreen(
                         onClick = { navController.navigate("Add/$dateId") }) {
                         Icon(Icons.Outlined.AddCircle,
                             contentDescription = null,
-                        modifier = Modifier.padding(end = 15.dp))
-                        Text("新增行程",modifier = Modifier.padding(end = 5.dp).padding(vertical = 10.dp))
+                            modifier = Modifier.padding(end = 15.dp))
+                        Text("新增行程",
+                            modifier = Modifier
+                                .padding(end = 5.dp)
+                                .padding(vertical = 10.dp))
                     }
                 } else {
-                    Divider(color = MaterialTheme.colorScheme.secondary,
-                        thickness = 1.dp,
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .padding(horizontal = 8.dp))
+
                     LazyColumn(modifier = Modifier.padding(bottom = 20.dp)) {
-                        itemsIndexed(scheduleList) { idx,schedule ->
-                            ScheduleItemDisplay(schedule, navController,context,idx
+                        item {
+                            Divider(color = MaterialTheme.colorScheme.secondary,
+                                thickness = 1.dp,
+                                modifier = Modifier
+                                    .padding(top = 4.dp)
+                                    .padding(horizontal = 8.dp))
+                        }
+                        itemsIndexed(scheduleList) { idx, schedule ->
+                            ScheduleItemDisplay(schedule, navController, context, idx
                             ) { scheduleVM.deleteSchedule(it) }
                         }
+                    }
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(painterResource(R.drawable.resource_switch), null)
                     }
 
                 }
@@ -117,41 +129,54 @@ fun DayScreen(
 }
 
 @Composable
-fun ScheduleItemDisplay(schedule: ScheduleItem, navController: NavController,context: Context,idx:Int,scheduleVM:(Int)->Unit ) {
-    Card(modifier = Modifier
-        .fillMaxWidth()
+fun ScheduleItemDisplay(
+    schedule: ScheduleItem,
+    navController: NavController,
+    context: Context,
+    idx: Int,
+    scheduleVM: (Int) -> Unit,
+) {
+    Row(modifier = Modifier
         .padding(top = 8.dp)) {
-        Row(
-            modifier = Modifier
-                .padding(vertical = 6.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = schedule.title.value,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(start = 20.dp),
-            )
-            Row {
-                Icon(Icons.Filled.Delete,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(end = 20.dp)
-                        .size(24.dp)
-                        .clickable {
-                            db_delete(id = schedule.id, context = context)
-                            scheduleVM(idx)
-                        })
-                Icon(Icons.Filled.Edit,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(end = 20.dp)
-                        .size(24.dp)
-                        .clickable { navController.navigate("Edit/$idx") })
+        Text(
+            text = "12:30",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(start = 20.dp),
+        )
+        Card(modifier = Modifier
+            .fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 6.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = schedule.title.value,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(start = 20.dp),
+                )
+                Row {
+                    Icon(Icons.Filled.Delete,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 20.dp)
+                            .size(24.dp)
+                            .clickable {
+                                db_delete(id = schedule.id, context = context)
+                                scheduleVM(idx)
+                            })
+                    Icon(Icons.Filled.Edit,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 20.dp)
+                            .size(24.dp)
+                            .clickable { navController.navigate("Edit/$idx") })
+                }
             }
-        }
 
+        }
     }
 }
 

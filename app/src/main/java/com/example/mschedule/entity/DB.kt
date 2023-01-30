@@ -31,6 +31,12 @@ object FeedReaderContract {
         const val COLUMN_NAME_tag = "tag"
         const val COLUMN_NAME_note = "note"
     }
+
+    object FeedEntry3 : BaseColumns {
+        const val TABLE_NAME = "member"
+        const val COLUMN_NAME_email = "email"
+        const val COLUMN_NAME_password = "password"
+    }
 }
 
 private const val SQL_CREATE_ENTRIES =
@@ -54,11 +60,20 @@ private const val SQL_CREATE_ENTRIES2 =
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_tag} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_note} TEXT);"
 
+private const val SQL_CREATE_ENTRIES3 =
+    "CREATE TABLE ${FeedReaderContract.FeedEntry3.TABLE_NAME} (" +
+            "${BaseColumns._ID} INTEGER PRIMARY KEY," +
+            "${FeedReaderContract.FeedEntry3.COLUMN_NAME_email} TEXT," +
+            "${FeedReaderContract.FeedEntry3.COLUMN_NAME_password} TEXT);"
+
 private const val SQL_DELETE_ENTRIES =
     "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry.TABLE_NAME}"
 
 private const val SQL_DELETE_ENTRIES2 =
     "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry2.TABLE_NAME}"
+
+private const val SQL_DELETE_ENTRIES3 =
+    "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry3.TABLE_NAME}"
 
 
 class FeedReaderDbHelper(context: Context) :
@@ -66,6 +81,7 @@ class FeedReaderDbHelper(context: Context) :
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(SQL_CREATE_ENTRIES)
         db.execSQL(SQL_CREATE_ENTRIES2)
+        db.execSQL(SQL_CREATE_ENTRIES3)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -87,49 +103,77 @@ class FeedReaderDbHelper(context: Context) :
     }
 }
 
-fun db_Add(si: ScheduleItem, context: Context) {
+fun db_Register(email: String, password: String, repeat: String, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
     val wdb = dbHelper.writableDatabase
-    //wdb.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry2.TABLE_NAME}")
-    //wdb.execSQL(SQL_CREATE_ENTRIES2)
-    val values = ContentValues().apply {
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime, si.startTime.value.toString())
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime, si.endTime.value.toString())
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay, si.isAllDay.value)
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat, si.isRepeat.value)
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_member, si.member.value)
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule, si.schedule.value)
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_tag, si.tag.value)
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_note, si.note.value)
-
+    if (password == repeat) {
+        var values = ContentValues().apply {
+            put(FeedReaderContract.FeedEntry3.COLUMN_NAME_email, email)
+            put(FeedReaderContract.FeedEntry3.COLUMN_NAME_password, password)
+        }
+        val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+        return true
     }
-    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
-    //Text( newRowId.toString())
-    //val c:cursor = db.rawQuery("SELECT * FROM $DataBaseTable", null)
+    return false
 }
-fun db_delete(id:Int, context: Context) {
+
+fun db_Login(email: String, password: String, context: Context): Boolean {
+    val dbHelper = FeedReaderDbHelper(context)
+    val rdb = dbHelper.writableDatabase
+    val c: Cursor =
+        rdb.rawQuery("SELECT member.password FROM member WHERE member.email ='$email'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+            null)
+    if (c.count!=0 && c.getString(0) == password) {
+        return true
+    }
+    return false
+}
+
+fun db_Search(search:String, context: Context) : MutableList<Int>{
+    val dbHelper = FeedReaderDbHelper(context)
+    val rdb = dbHelper.writableDatabase
+    val c: Cursor =
+        rdb.rawQuery("SELECT DISTINCT itemList._id FROM itemList WHERE itemList.title ='$search' OR itemList.note ='$search'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+            null)
+    var res = mutableListOf<Int>()
+    with(c) {
+        while (moveToNext()) {
+            res.add(c.getInt(0))
+        }
+    }
+    return res
+
+}
+
+fun db_Add(si: ScheduleItem, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val rdb = dbHelper.readableDatabase
+
+}
+
+fun db_delete(id: Int, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val wdb = dbHelper.writableDatabase
     wdb.execSQL("DELETE FROM itemList WHERE itemList._ID = $id;")
 }
 
-fun db_Check(date: LocalDate, context: Context):Boolean {
+fun db_Check(date: LocalDate, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
         rdb.rawQuery("SELECT * FROM itemList WHERE itemList.startTime ='$date'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
             null)
-    if (c.count > 0){
+    if (c.count > 0) {
         return true
     }
     return false
 }
+
 fun db_Select(date: LocalDate, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery("SELECT * FROM itemList WHERE itemList.startTime ='$date'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+        rdb.rawQuery("SELECT * FROM itemList WHERE itemList.startTime ='$date'", //WHERE ('$date' >= itemList.startTime AND '$date' <= itemList.startTime) OR MOD( ('$date' - itemList.endTime ), itemList.isRepeat )= 0
             null)
     tempItemList.removeAll(tempItemList)
     if (c.count != 0) {

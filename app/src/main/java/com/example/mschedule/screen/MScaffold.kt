@@ -6,8 +6,10 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.myapplication7.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,16 +27,18 @@ fun MTopBar(
         },
         navigationIcon = {
             IconButton(onClick = { onButtonClicked() }) {
-                Icon(Icons.Filled.Menu, null)
+                Icon(painter = painterResource(R.drawable.menu), null)
             }
         },
         actions = {
             IconButton(onClick = { onSearchBarClick() } //do something
             ) {
-                if (icon == "s")
+                if (icon == "s") {
                     Icon(Icons.Filled.Search, null)
-                else
+                    Icon(Icons.Filled.Settings, null)
+                }else {
                     Icon(Icons.Filled.Close, null)
+                }
             }
         },
 

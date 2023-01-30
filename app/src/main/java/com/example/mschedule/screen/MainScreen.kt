@@ -61,18 +61,20 @@ fun MainScreen(
     openDrawer: () -> Unit,
 ) {
     val localDate = remember { mutableStateOf(LocalDate.now()) }
-    val formatter = DateTimeFormatter.ofPattern("yyyy年MM月", Locale.TAIWAN)
     val formatterMonth = DateTimeFormatter.ofPattern("MM", Locale.TAIWAN)
+    val formatterYear = DateTimeFormatter.ofPattern("yyyy", Locale.TAIWAN)
     val context = LocalContext.current
     val textState = remember { mutableStateOf(TextFieldValue("")) }
     var showAlertDialog by remember { mutableStateOf(false) }
     val systemUiController = rememberSystemUiController() //設定導航欄透明色
-    val year = "2023"
-    val monthNum = remember {
+    var yearNum = remember {
+        mutableStateOf(localDate.value.format(formatterYear).toInt())
+    }
+    var monthNum = remember {
         mutableStateOf(localDate.value.format(formatterMonth).toInt())
     }
     val months = Months()
-    val month = months.getMoon(monthNum.value)
+    val month = months.getMoon(yearNum.value,monthNum.value)
 
     val horizontalCount = remember {
         mutableStateOf(0.0)
@@ -134,9 +136,9 @@ fun MainScreen(
                         .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center) {
                         Icon(Icons.Filled.ArrowBack,
-                            modifier = Modifier.clickable {},
+                            modifier = Modifier.clickable {yearNum.value-=1},
                             contentDescription = null)
-                        Text(text = "2023年 ${monthNum.value} 月",
+                        Text(text = "${yearNum.value}年 ${monthNum.value} 月",
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .padding(start = 30.dp, end = 30.dp)
@@ -147,7 +149,7 @@ fun MainScreen(
                                 }
                         )
                         Icon(Icons.Filled.ArrowForward,
-                            modifier = Modifier.clickable {},
+                            modifier = Modifier.clickable {yearNum.value+=1},
                             contentDescription = null)
                     }
                 }
@@ -168,7 +170,7 @@ fun MainScreen(
                             modifier = Modifier
                                 .padding(top = 4.dp)
                                 .padding(horizontal = 8.dp))
-                        DateItem(m, navController, year, monthNum.value.toString(), context)
+                        DateItem(m, navController, yearNum.value.toString(), monthNum.value.toString(), context)
                     }
                 }
                 /*
@@ -256,11 +258,13 @@ fun DateItem(
                     Column {
                         Box(modifier = Modifier.size(40.dp, 56.dp),
                             contentAlignment = Alignment.Center) {
+
                             if (db_Check(sdf.parse("$year-$month-$date").toInstant().atZone(
                                     ZoneId.systemDefault()).toLocalDate(), context)
                             ) {
                                 Icon(Icons.Filled.Done, null)
                             }
+
                         }
                     }
 

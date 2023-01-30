@@ -109,7 +109,7 @@ fun Help(
         mutableStateOf(0.0)
     }
     val months = Months()
-    val month = months.getMoon(monthNum.value)
+    val month = months.getMoon(2023,monthNum.value)
     val state = rememberScrollableState {
         horizontalCount.value += it
         if(horizontalCount.value<-400.0 && monthNum.value<12){
