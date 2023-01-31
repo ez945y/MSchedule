@@ -22,6 +22,7 @@ object FeedReaderContract {
     object FeedEntry2 : BaseColumns {
         const val TABLE_NAME = "itemList"
         const val COLUMN_NAME_title = "title"
+        const val COLUMN_NAME_clock = "clock"
         const val COLUMN_NAME_startTime = "startTime"
         const val COLUMN_NAME_endTime = "endTime"
         const val COLUMN_NAME_isAllDay = "isAllDay"
@@ -52,9 +53,9 @@ private const val SQL_CREATE_ENTRIES2 =
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_title} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime} TEXT," +
-            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime} TEXT," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime} TEXT," + //clock
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay} Bool," +
-            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat} Bool," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat} Bool," + //Int
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_member} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_tag} TEXT," +
@@ -186,7 +187,7 @@ fun db_Select(date: LocalDate, context: Context) {
                 item.startTime.value = sdf.parse(getString(2)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
                 item.endTime.value = sdf.parse(getString(3)).toInstant().atZone(
-                    ZoneId.systemDefault()).toLocalDate()
+                    ZoneId.systemDefault()).toLocalDate() //clock
                 item.isAllDay.value = getInt(4) > 0
                 item.isRepeat.value = getInt(5) > 0
                 item.member.value = getString(6).orEmpty()

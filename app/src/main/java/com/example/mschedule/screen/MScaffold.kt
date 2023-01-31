@@ -1,6 +1,7 @@
 package com.example.mschedule.screen
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -27,17 +28,19 @@ fun MTopBar(
         },
         navigationIcon = {
             IconButton(onClick = { onButtonClicked() }) {
-                Icon(painter = painterResource(R.drawable.menu), null)
+                Icon(painter = painterResource(R.drawable.menu), null,modifier=Modifier.size(24.dp))
             }
         },
         actions = {
             IconButton(onClick = { onSearchBarClick() } //do something
             ) {
                 if (icon == "s") {
-                    Icon(Icons.Filled.Search, null)
-                    Icon(Icons.Filled.Settings, null)
+                    Row {
+                        Icon(Icons.Filled.Search, null,modifier = Modifier.size(24.dp).padding(end=5.dp))
+                        Icon(painterResource(id = R.drawable.setting), null,modifier = Modifier.padding(top=3.dp))
+                    }
                 }else {
-                    Icon(Icons.Filled.Close, null)
+                    Icon(Icons.Filled.Close, null,modifier=Modifier.size(24.dp))
                 }
             }
         },

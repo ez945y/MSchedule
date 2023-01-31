@@ -38,7 +38,6 @@ import java.util.*
 fun DayScreen(
     dateId: String = "2023-01-28",
     navController: NavController,
-    openDrawer: () -> Unit,
 ) {
     val sdf = SimpleDateFormat("yyyy-MM-dd")
     val formatter = DateTimeFormatter.ofPattern("MM月dd日 E", Locale.TAIWAN)
@@ -55,77 +54,69 @@ fun DayScreen(
 
     val scheduleVM = ScheduleViewModel()
     val scheduleList = scheduleVM.scheduleList
-    Scaffold(
-        topBar = {
-            MTopBar("行程安排", { navController.popBackStack() }, icon = "c", openDrawer)
-        },
-    ) { contentPadding ->
-        Card(modifier = Modifier
-            .padding(contentPadding)
-            .fillMaxWidth()
-            .size(0.dp, 900.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-        ) {
-            Column {
-                Row(
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .size(0.dp, 900.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 6.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = date.value.format(formatter),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier
-                        .padding(vertical = 6.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(text = date.value.format(formatter),
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .padding(start = 20.dp, top = 20.dp, bottom = 15.dp)
-                            .clickable {
-                                datePicker(true, context, date.value, onDateSelect = {
-                                    date.value = it
-                                })
-                            }
-                    )
+                        .padding(start = 20.dp, top = 20.dp, bottom = 15.dp)
+                        .clickable {
+                            datePicker(true, context, date.value, onDateSelect = {
+                                date.value = it
+                            })
+                        }
+                )
+                Icon(Icons.Outlined.AddCircle,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .clickable { navController.navigate("Add/$dateId") })
+            }
+            if (scheduleList.isEmpty()) {
+                Button(modifier = Modifier
+                    .padding(top = 200.dp, start = 120.dp),
+                    onClick = { navController.navigate("Add/$dateId") }) {
                     Icon(Icons.Outlined.AddCircle,
                         contentDescription = null,
+                        modifier = Modifier.padding(end = 15.dp))
+                    Text("新增行程",
                         modifier = Modifier
-                            .padding(end = 20.dp)
-                            .clickable { navController.navigate("Add/$dateId") })
+                            .padding(end = 5.dp)
+                            .padding(vertical = 10.dp))
                 }
-                if (scheduleList.isEmpty()) {
-                    Button(modifier = Modifier
-                        .padding(top = 200.dp, start = 120.dp),
-                        onClick = { navController.navigate("Add/$dateId") }) {
-                        Icon(Icons.Outlined.AddCircle,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 15.dp))
-                        Text("新增行程",
+            } else {
+
+                LazyColumn(modifier = Modifier.padding(bottom = 20.dp)) {
+                    item {
+                        Divider(color = MaterialTheme.colorScheme.secondary,
+                            thickness = 1.dp,
                             modifier = Modifier
-                                .padding(end = 5.dp)
-                                .padding(vertical = 10.dp))
+                                .padding(top = 4.dp)
+                                .padding(horizontal = 8.dp))
                     }
-                } else {
-
-                    LazyColumn(modifier = Modifier.padding(bottom = 20.dp)) {
-                        item {
-                            Divider(color = MaterialTheme.colorScheme.secondary,
-                                thickness = 1.dp,
-                                modifier = Modifier
-                                    .padding(top = 4.dp)
-                                    .padding(horizontal = 8.dp))
-                        }
-                        itemsIndexed(scheduleList) { idx, schedule ->
-                            ScheduleItemDisplay(schedule, navController, context, idx
-                            ) { scheduleVM.deleteSchedule(it) }
-                        }
+                    itemsIndexed(scheduleList) { idx, schedule ->
+                        ScheduleItemDisplay(schedule, navController, context, idx
+                        ) { scheduleVM.deleteSchedule(it) }
                     }
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(painterResource(R.drawable.resource_switch), null)
-                    }
-
                 }
+
+
             }
         }
     }
+
 }
 
 @Composable
@@ -183,5 +174,5 @@ fun ScheduleItemDisplay(
 @Preview
 @Composable
 fun DayPreview() {
-    DayScreen("1", rememberNavController()) {}
+    DayScreen("1", rememberNavController())
 }
