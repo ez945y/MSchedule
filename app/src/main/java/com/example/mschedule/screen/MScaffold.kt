@@ -28,33 +28,50 @@ fun MTopBar(
         },
         navigationIcon = {
             IconButton(onClick = { onButtonClicked() }) {
-                Icon(painter = painterResource(R.drawable.menu), null,modifier=Modifier.size(24.dp))
+                Icon(painter = painterResource(R.drawable.menu),
+                    null,
+                    modifier = Modifier.size(24.dp))
             }
         },
         actions = {
-            IconButton(onClick = { onSearchBarClick() } //do something
-            ) {
-                if (icon == "s") {
-                    Row {
-                        Icon(Icons.Filled.Search, null,modifier = Modifier.size(24.dp).padding(end=5.dp))
-                        Icon(painterResource(id = R.drawable.setting), null,modifier = Modifier.padding(top=3.dp))
+
+            if (icon == "s") {
+                Row {
+                    IconButton(onClick = { onSearchBarClick() } //do something
+                    ) {
+                        Icon(Icons.Filled.Search,
+                            null,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(top = 3.dp))
                     }
-                }else {
-                    Icon(Icons.Filled.Close, null,modifier=Modifier.size(24.dp))
+                    IconButton (onClick = { onSearchBarClick() } //do something
+                            ) {
+                        Icon(painterResource(id = R.drawable.setting),
+                            null,
+                            modifier = Modifier.size(24.dp).padding(top = 3.dp))
+
+                    }
+                }
+            } else {
+                IconButton(onClick = { onSearchBarClick() } //do something
+                ) {
+                    Icon(Icons.Filled.Close, null, modifier = Modifier.size(24.dp))
                 }
             }
+
         },
 
         )
 }
 
 @Composable
-fun MBottomBar(onAddScheduleClick:()->Unit) {
+fun MBottomBar(onAddScheduleClick: () -> Unit) {
     BottomAppBar {
         IconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
             Icon(Icons.Filled.Edit, null)
         }
-        IconButton(onClick = { onAddScheduleClick()}, modifier = Modifier.weight(1f)) {
+        IconButton(onClick = { onAddScheduleClick() }, modifier = Modifier.weight(1f)) {
             Icon(Icons.Filled.Add, null)
         }
         IconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {

@@ -53,9 +53,10 @@ private const val SQL_CREATE_ENTRIES2 =
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_title} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime} TEXT," +
-            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime} TEXT," + //clock
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime} TEXT," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_clock} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay} Bool," +
-            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat} Bool," + //Int
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat} Int," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_member} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_tag} TEXT," +
@@ -90,6 +91,7 @@ class FeedReaderDbHelper(context: Context) :
         // to simply to discard the data and start over
         db.execSQL(SQL_DELETE_ENTRIES)
         db.execSQL(SQL_DELETE_ENTRIES2)
+        db.execSQL(SQL_DELETE_ENTRIES3)
         onCreate(db)
     }
 
@@ -148,8 +150,31 @@ fun db_Search(search:String, context: Context) : MutableList<Int>{
 
 fun db_Add(si: ScheduleItem, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.readableDatabase
+    val wdb = dbHelper.writableDatabase
+    val values = ContentValues().apply {
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime, si.startTime.value.toString())
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime, si.endTime.value.toString())
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_clock, si.clock.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay, si.isAllDay.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat, si.isRepeat.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_member, si.member.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule, si.schedule.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_tag, si.tag.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_note, si.note.value)
+    }
+        val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+}
 
+fun db_ReStart(context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val db = dbHelper.writableDatabase
+    db.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry.TABLE_NAME}")
+    db.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry2.TABLE_NAME}")
+    db.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry3.TABLE_NAME}")
+    db.execSQL(SQL_CREATE_ENTRIES)
+    db.execSQL(SQL_CREATE_ENTRIES2)
+    db.execSQL(SQL_CREATE_ENTRIES3)
 }
 
 fun db_delete(id: Int, context: Context) {
@@ -187,13 +212,14 @@ fun db_Select(date: LocalDate, context: Context) {
                 item.startTime.value = sdf.parse(getString(2)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
                 item.endTime.value = sdf.parse(getString(3)).toInstant().atZone(
-                    ZoneId.systemDefault()).toLocalDate() //clock
-                item.isAllDay.value = getInt(4) > 0
-                item.isRepeat.value = getInt(5) > 0
-                item.member.value = getString(6).orEmpty()
-                item.schedule.value = getString(7).orEmpty()
-                item.tag.value = getString(8).orEmpty()
-                item.note.value = getString(9).orEmpty()
+                    ZoneId.systemDefault()).toLocalDate()
+                item.clock.value = ""
+                item.isAllDay.value = getInt(5) > 0
+                item.isRepeat.value = getInt(6)
+                item.member.value = getString(7).orEmpty()
+                item.schedule.value = getString(8).orEmpty()
+                item.tag.value = getString(9).orEmpty()
+                item.note.value = getString(10).orEmpty()
                 tempItemList.add(item)
             }
         }

@@ -158,7 +158,7 @@ fun AddScreen(
                             .padding(top = 20.dp, start = 30.dp, end = 30.dp),
                         fontSize = 20.sp
                     )
-                    DropDownTest(Modifier.padding(start = 150.dp, top = 15.dp))
+                    DropDown(ScheduleItem.isRepeat,Modifier.padding(start = 150.dp, top = 15.dp))
                 }
 
                 Card(modifier = Modifier

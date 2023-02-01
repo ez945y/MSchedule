@@ -77,7 +77,7 @@ fun ItemList(state: MutableState<TextFieldValue>) {
 
     var filteredItems: List<String>
     Card(colors =CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
-        LazyColumn(modifier = Modifier.fillMaxWidth().padding(top=20.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxWidth().padding(top=70.dp)) {
             val searchedText = state.value.text
             filteredItems = if (searchedText.isEmpty()) {
                 items

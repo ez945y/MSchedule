@@ -1,11 +1,13 @@
 package com.example.mschedule.screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -18,23 +20,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.entity.ScheduleViewModel
 import com.example.mschedule.entity.scheduleItemList
-import com.example.mschedule.entity.sdf
 import com.example.mschedule.ui.theme.MScheduleTheme
-import java.time.ZoneId
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun simpleScreen(dateId: String = "2023-01-28", navController: NavController,) {
+fun simpleScreen(
+    localDate: MutableState<LocalDate>,
+    yearNum: MutableState<Int>,
+    monthNum: MutableState<Int>,
+    dayNum: MutableState<Int>,
+    navController: NavController,
+) {
     val formatter = DateTimeFormatter.ofPattern("MM月dd日 E", Locale.TAIWAN)
     val context = LocalContext.current
-    var date = remember {
-        mutableStateOf(sdf.parse(dateId).toInstant().atZone(
-            ZoneId.systemDefault()).toLocalDate())
-    }
-    val tempList = scheduleItemList
-    var index = remember { mutableStateOf(1) }
+    val formatterMonth = DateTimeFormatter.ofPattern("MM", Locale.TAIWAN)
+    val formatterYear = DateTimeFormatter.ofPattern("yyyy", Locale.TAIWAN)
+    val formatterDay = DateTimeFormatter.ofPattern("dd", Locale.TAIWAN)
+    yearNum.value = localDate.value.format(formatterYear).toInt()
+    monthNum.value = localDate.value.format(formatterMonth).toInt()
+    dayNum.value = localDate.value.format(formatterDay).toInt()
+    val scheduleVM = ScheduleViewModel()
+    val tempList = scheduleVM.scheduleList
+    var index = remember { mutableStateOf(0) }
     Column {
         Row(
             modifier = Modifier
@@ -43,14 +54,14 @@ fun simpleScreen(dateId: String = "2023-01-28", navController: NavController,) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = date.value.format(formatter),
+            Text(text = localDate.value.format(formatter),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(start = 20.dp, top = 20.dp, bottom = 15.dp)
                     .clickable {
-                        datePicker(true, context, date.value, onDateSelect = {
-                            date.value = it
+                        datePicker(true, context, localDate.value, onDateSelect = {
+                            localDate.value = it
                         })
                     }
             )
@@ -58,32 +69,36 @@ fun simpleScreen(dateId: String = "2023-01-28", navController: NavController,) {
                 contentDescription = null,
                 modifier = Modifier
                     .padding(end = 20.dp)
-                    .clickable { navController.navigate("Add/$dateId") })
+                    .clickable { navController.navigate("Add/${yearNum.value}-${monthNum.value}-${dayNum.value}") })
         }
         Box(modifier = Modifier.padding(top = 70.dp)) { //(horizontalAlignment = Alignment.CenterHorizontally)
-            Card(modifier = Modifier
-                .padding(start = 60.dp, end = 60.dp)
-                .fillMaxWidth()
-                .size(0.dp, 100.dp)
-                .clickable {},
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-                    .padding(top = 16.dp)) {
-                    Text("Past  ${tempList[index.value - 1].title.value}", modifier = Modifier
-                        .padding(start = 30.dp), fontSize = 24.sp)
+            if (tempList.size > 1 && index.value>0) {
+                Card(modifier = Modifier
+                    .padding(start = 60.dp, end = 60.dp)
+                    .fillMaxWidth()
+                    .size(0.dp, 100.dp)
+                    .clickable {index.value-=1},
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+                        .padding(top = 16.dp)) {
+                        Text("Past  ${tempList[index.value - 1].title.value}", modifier = Modifier
+                            .padding(start = 30.dp), fontSize = 24.sp)
+                    }
                 }
             }
-
-            Card(modifier = Modifier
-                .padding(start = 60.dp, end = 60.dp, top = 350.dp)
-                .fillMaxWidth()
-                .size(0.dp, 100.dp)
-                .clickable {},
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-                    .padding(top = 40.dp)) {
-                    Text("Next  ${tempList[index.value + 1].title.value}", modifier = Modifier
-                        .padding(start = 30.dp), fontSize = 24.sp)
+            if (tempList.size > 2 && index.value<tempList.size-1) {
+                Card(modifier = Modifier
+                    .padding(start = 60.dp, end = 60.dp, top = 350.dp)
+                    .fillMaxWidth()
+                    .size(0.dp, 100.dp)
+                    .clickable {index.value+=1},
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+                        .padding(top = 40.dp)) {
+                        Text("Next  ${tempList[index.value + 1].title.value}", modifier = Modifier
+                            .padding(start = 30.dp), fontSize = 24.sp)
+                    }
                 }
             }
             Card(modifier = Modifier
@@ -112,12 +127,18 @@ fun simpleScreen(dateId: String = "2023-01-28", navController: NavController,) {
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Preview
 @Composable
 fun simplePreview() {
     MScheduleTheme {
         Surface {
-            simpleScreen("2023-01-28",rememberNavController())
+            simpleScreen(
+                mutableStateOf(LocalDate.now()),
+                mutableStateOf(1),
+                mutableStateOf(1),
+                mutableStateOf(1),
+                rememberNavController())
         }
     }
 

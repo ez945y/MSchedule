@@ -12,14 +12,14 @@ data class ScheduleItem (
     var title: MutableState<String> =mutableStateOf(""),
     var startTime: MutableState<LocalDate> =mutableStateOf(LocalDate.now()),
     var endTime: MutableState<LocalDate> =mutableStateOf(LocalDate.now()),
+    val clock: MutableState<String> = mutableStateOf(""),
     var isAllDay: MutableState<Boolean> =mutableStateOf(false),
-    var isRepeat: MutableState<Boolean> =mutableStateOf(false),
+    var isRepeat: MutableState<Int> =mutableStateOf(0),
     var member:MutableState<String> =mutableStateOf(""),
     var schedule:MutableState<String> =mutableStateOf(""),
     var tag:MutableState<String> =mutableStateOf(""),
     var note:MutableState<String> =mutableStateOf(""),
 )
-
 class ScheduleViewModel() : ViewModel() { //items: List<ScheduleItem>
 
     private fun getSchedule(): SnapshotStateList<ScheduleItem> {

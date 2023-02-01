@@ -123,25 +123,7 @@ fun Help(
         }
         it
     }
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(top = 200.dp).scrollable(
-            state = state, orientation = Orientation.Horizontal,
-        )) {
-        Column(modifier = Modifier
-            .fillMaxWidth()) {
-            Text("${monthNum.value}月")
-            for (idx in 0 until month.size) {
-                val m = month[idx]
-                Divider(color = MaterialTheme.colorScheme.secondary,
-                    thickness = 1.dp,
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .padding(horizontal = 8.dp))
-                DateItem(m, navController, year, monthNum.value.toString(), context)
-            }
-        }
-    }
+
 }
 
 

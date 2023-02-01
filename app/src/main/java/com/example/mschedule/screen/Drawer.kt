@@ -8,9 +8,11 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.myapplication7.R
 
 sealed class DrawerScreens(val title: String, val route: String) {
     object Main : DrawerScreens("行事曆", "Main")
@@ -44,10 +46,10 @@ fun Drawer(
                 .padding(start = 15.dp, top = 48.dp)
         ) {
             Row {
-                Icon(Icons.Filled.Menu,
+                Icon(painterResource(id = R.drawable.menu),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.background,
-                    modifier = Modifier.padding(top = 2.dp))
+                    modifier = Modifier.size(24.dp).padding(top = 3.dp))
                 Spacer(modifier = Modifier.padding(4.dp))
                 Text("選單",
                     style = MaterialTheme.typography.titleMedium,

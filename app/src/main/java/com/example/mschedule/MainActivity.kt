@@ -16,8 +16,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.mschedule.entity.FeedReaderDbHelper
-import com.example.mschedule.entity.ScheduleItem
+import com.example.mschedule.entity.*
 import com.example.mschedule.screen.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import com.example.mschedule.ui.theme.isLight
@@ -31,12 +30,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
         setContent {
             MScheduleTheme {
                 Surface {
                     rememberSystemUiController().setStatusBarColor(
                         Color.Transparent, darkIcons = MaterialTheme.colorScheme.isLight())
+
+                    //db_ReStart(LocalContext.current)
+
                     val navController = rememberNavController()
                     val drawerState = rememberDrawerState(DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
@@ -74,14 +75,7 @@ class MainActivity : ComponentActivity() {
                                         openDrawer()
                                     })
                             }
-                            composable(route = DrawerScreens.Add.route+"/{dateID}") {backStackEntry ->
-                                AddScreen(ScheduleItem(1),
-                                    navController = navController,
-                                    dateId = backStackEntry.arguments?.getString("dateID").orEmpty(),
-                                    openDrawer = {
-                                        openDrawer()
-                                    })
-                            }
+
                             composable(route =DrawerScreens.Edit.route+"/{scheduleID}") { backStackEntry ->
                                     EditScreen(
                                         id= backStackEntry.arguments?.getString("scheduleID").orEmpty(),
@@ -108,13 +102,22 @@ class MainActivity : ComponentActivity() {
                                 Help(
                                 )
                             }
+                            composable(route = DrawerScreens.Add.route+"/{dateID}") {backStackEntry ->
+                                AddScreen(ScheduleItem(1),
+                                    navController = navController,
+                                    dateId = backStackEntry.arguments?.getString("dateID").orEmpty(),
+                                    openDrawer = {
+                                        openDrawer()
+                                    })
+                            }
+                            /*
                             composable(DrawerScreens.Day.route+"/{dateID}") { backStackEntry ->
                                 DayScreen(
                                     dateId = backStackEntry.arguments?.getString("dateID").orEmpty(),
                                     navController = navController,
                                 )
                             }
-
+                             */
                         }
                     }
                 }

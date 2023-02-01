@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -148,7 +149,7 @@ fun EditScreen(
                             .padding(top = 20.dp, start = 30.dp, end = 30.dp),
                         fontSize = 20.sp
                     )
-                    DropDownTest(Modifier.padding(start = 150.dp, top = 15.dp))
+                    DropDown(scheduleItem.isRepeat,Modifier.padding(start = 150.dp, top = 15.dp))
                 }
 
                 Card(modifier = Modifier
@@ -199,12 +200,15 @@ fun EditPreview() {
 
 
 @Composable
-fun DropDownTest(modifier:Modifier) {
+fun DropDown(
+    data:MutableState<Int>,
+    modifier:Modifier) {
     var expanded = remember {
         mutableStateOf(false)
     }
     var text = remember {mutableStateOf("永不")}
     val items = listOf("永不", "每天", "每周", "每月", "每年")
+    val value = listOf(0, 1, 7, 30, 365)
     Box(
         modifier = modifier
     ) {
@@ -217,11 +221,12 @@ fun DropDownTest(modifier:Modifier) {
         }
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
-            items.forEach { s ->
+            items.forEachIndexed { idx,s ->
                 DropdownMenuItem(
                     text = { Text(text = s)},
                     onClick = {
                         text.value = s
+                        data.value = value[idx]
                         expanded.value = false
                     }
                 )
