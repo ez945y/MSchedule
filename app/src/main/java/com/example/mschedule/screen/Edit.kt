@@ -57,7 +57,7 @@ fun EditScreen(
     )
     Scaffold(
         topBar = {
-            MTopBar("編輯行程", {navController.popBackStack()}, icon = "c", openDrawer)
+            MTopBar ( onSearchBarClick={navController.popBackStack()}, icon = "c", onButtonClicked=openDrawer)
         },
     ) { contentPadding ->
         Card(modifier = Modifier

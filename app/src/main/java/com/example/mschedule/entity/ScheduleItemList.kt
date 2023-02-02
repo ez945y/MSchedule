@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 data class ScheduleItem (
     var id :Int,
@@ -44,3 +43,18 @@ class ScheduleViewModel() : ViewModel() { //items: List<ScheduleItem>
 
 }
 
+class SearchViewModel() : ViewModel() { //items: List<ScheduleItem>
+
+    private fun getSearch(): SnapshotStateList<String> {
+        return searchItemList.toMutableStateList()
+    }
+
+    private val _searchList = getSearch().toMutableStateList()
+    val searchList: SnapshotStateList<String>
+        get() = _searchList
+
+    fun addSchedule(trainingItem: String) {
+        _searchList.add(trainingItem)
+    }
+
+}

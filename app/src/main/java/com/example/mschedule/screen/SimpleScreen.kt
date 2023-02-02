@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.entity.ScheduleViewModel
+import com.example.mschedule.entity.db_Select
 import com.example.mschedule.entity.scheduleItemList
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.time.LocalDate
@@ -43,84 +44,116 @@ fun simpleScreen(
     yearNum.value = localDate.value.format(formatterYear).toInt()
     monthNum.value = localDate.value.format(formatterMonth).toInt()
     dayNum.value = localDate.value.format(formatterDay).toInt()
+
+    var flag = remember { mutableStateOf(true) }
+    if (flag.value) {
+        db_Select(localDate.value, context)
+        flag.value = false
+    }
     val scheduleVM = ScheduleViewModel()
     val tempList = scheduleVM.scheduleList
     var index = remember { mutableStateOf(0) }
-    Column {
-        Row(
-            modifier = Modifier
-                .padding(vertical = 6.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = localDate.value.format(formatter),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column {
+            Row(
                 modifier = Modifier
-                    .padding(start = 20.dp, top = 20.dp, bottom = 15.dp)
-                    .clickable {
-                        datePicker(true, context, localDate.value, onDateSelect = {
-                            localDate.value = it
-                        })
-                    }
-            )
-            Icon(Icons.Outlined.AddCircle,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 20.dp)
-                    .clickable { navController.navigate("Add/${yearNum.value}-${monthNum.value}-${dayNum.value}") })
-        }
-        Box(modifier = Modifier.padding(top = 70.dp)) { //(horizontalAlignment = Alignment.CenterHorizontally)
-            if (tempList.size > 1 && index.value>0) {
-                Card(modifier = Modifier
-                    .padding(start = 60.dp, end = 60.dp)
-                    .fillMaxWidth()
-                    .size(0.dp, 100.dp)
-                    .clickable {index.value-=1},
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
+                    .padding(vertical = 6.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = localDate.value.format(formatter),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(start = 20.dp, top = 20.dp, bottom = 15.dp)
+                        .clickable {
+                            datePicker(true, context, localDate.value, onDateSelect = {
+                                localDate.value = it
+                            })
+                        }
+                )
+                Icon(Icons.Outlined.AddCircle,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .clickable { navController.navigate("Add/${yearNum.value}-${monthNum.value}-${dayNum.value}") })
+            }
+            if (tempList.isEmpty()) {
+                Button(modifier = Modifier
+                    .padding(top = 200.dp, start = 120.dp),
+                    onClick = { navController.navigate("Add/${yearNum.value}-${monthNum.value}-${dayNum.value}") }) {
+                    Icon(Icons.Outlined.AddCircle,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 15.dp))
+                    Text("新增行程",
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .padding(vertical = 10.dp))
+                }
+            } else {
+                Box(modifier = Modifier.padding(top = 70.dp)) { //(horizontalAlignment = Alignment.CenterHorizontally)
+                    if (tempList.size > 1 && index.value > 0) {
+                        Card(modifier = Modifier
+                            .padding(start = 60.dp, end = 60.dp)
+                            .fillMaxWidth()
+                            .size(0.dp, 100.dp)
+                            .clickable { index.value -= 1 },
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
 
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-                        .padding(top = 16.dp)) {
-                        Text("Past  ${tempList[index.value - 1].title.value}", modifier = Modifier
-                            .padding(start = 30.dp), fontSize = 24.sp)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .padding(top = 16.dp)) {
+                                Text("Past  ${tempList[index.value - 1].title.value}",
+                                    modifier = Modifier
+                                        .padding(start = 30.dp),
+                                    fontSize = 24.sp)
+                            }
+                        }
                     }
-                }
-            }
-            if (tempList.size > 2 && index.value<tempList.size-1) {
-                Card(modifier = Modifier
-                    .padding(start = 60.dp, end = 60.dp, top = 350.dp)
-                    .fillMaxWidth()
-                    .size(0.dp, 100.dp)
-                    .clickable {index.value+=1},
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-                        .padding(top = 40.dp)) {
-                        Text("Next  ${tempList[index.value + 1].title.value}", modifier = Modifier
-                            .padding(start = 30.dp), fontSize = 24.sp)
+                    if (tempList.size > 2 && index.value < tempList.size - 1) {
+                        Card(modifier = Modifier
+                            .padding(start = 60.dp, end = 60.dp, top = 350.dp)
+                            .fillMaxWidth()
+                            .size(0.dp, 100.dp)
+                            .clickable { index.value += 1 },
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .padding(top = 40.dp)) {
+                                Text("Next  ${tempList[index.value + 1].title.value}",
+                                    modifier = Modifier
+                                        .padding(start = 30.dp),
+                                    fontSize = 24.sp)
+                            }
+                        }
                     }
-                }
-            }
-            Card(modifier = Modifier
-                .padding(top = 70.dp, start = 30.dp, end = 30.dp)
-                .fillMaxWidth(),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("10:45", modifier = Modifier
-                        .padding(top = 25.dp, bottom = 8.dp), fontSize = 24.sp)
-                    Divider(color = MaterialTheme.colorScheme.surfaceVariant,
-                        thickness = 1.dp,
-                        modifier = Modifier
-                            .padding(horizontal = 50.dp))
-                    Text("${tempList[index.value].title.value}", modifier = Modifier
-                        .padding(top = 40.dp, bottom = 40.dp), fontSize = 35.sp)
-                    Divider(color = MaterialTheme.colorScheme.surfaceVariant,
-                        thickness = 1.dp,
-                        modifier = Modifier
-                            .padding(horizontal = 50.dp))
-                    Text("別忘記帶自拍棒", modifier = Modifier
-                        .padding(top = 25.dp, bottom = 25.dp), fontSize = 24.sp)
+                    Card(modifier = Modifier
+                        .padding(top = 70.dp, start = 30.dp, end = 30.dp)
+                        .fillMaxWidth(),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("10:45", modifier = Modifier
+                                .padding(top = 25.dp, bottom = 8.dp), fontSize = 24.sp)
+                            Divider(color = MaterialTheme.colorScheme.surfaceVariant,
+                                thickness = 1.dp,
+                                modifier = Modifier
+                                    .padding(horizontal = 50.dp))
+                            Text("${tempList[index.value].title.value}", modifier = Modifier
+                                .padding(top = 40.dp, bottom = 40.dp), fontSize = 35.sp)
+                            Divider(color = MaterialTheme.colorScheme.surfaceVariant,
+                                thickness = 1.dp,
+                                modifier = Modifier
+                                    .padding(horizontal = 50.dp))
+                            Text("別忘記帶自拍棒", modifier = Modifier
+                                .padding(top = 25.dp, bottom = 25.dp), fontSize = 24.sp)
+                        }
+                    }
                 }
             }
         }

@@ -6,26 +6,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.myapplication7.R
+import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MTopBar(
-    title: String,
     onSearchBarClick: () -> Unit,
     icon: String = "s",
+    change:MutableState<Int> = mutableStateOf(1),
     onButtonClicked: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
-        title = {
-            Text(modifier = Modifier.clickable {}, text = title, textAlign = TextAlign.Center)
-
-        },
+        title = { },
         navigationIcon = {
             IconButton(onClick = { onButtonClicked() }) {
                 Icon(painter = painterResource(R.drawable.menu),
@@ -37,6 +37,13 @@ fun MTopBar(
 
             if (icon == "s") {
                 Row {
+                    IconButton (onClick = { if(change.value!=2){change.value =2}else{change.value =1} } //do something
+                    ) {
+                        Icon(painterResource(id = R.drawable.calendar),
+                            null,
+                            modifier = Modifier.size(24.dp).padding(top = 3.dp))
+
+                    }
                     IconButton(onClick = { onSearchBarClick() } //do something
                     ) {
                         Icon(Icons.Filled.Search,

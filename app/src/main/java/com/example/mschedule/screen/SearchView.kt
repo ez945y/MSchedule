@@ -1,5 +1,6 @@
 package com.example.mschedule.screen
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,11 +13,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mschedule.entity.ScheduleViewModel
+import com.example.mschedule.entity.SearchViewModel
+import com.example.mschedule.entity.db_Search
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.util.*
 
@@ -72,24 +77,18 @@ fun SearchScreen(
 }
 
 @Composable
-fun ItemList(state: MutableState<TextFieldValue>) {
-    val items by remember { mutableStateOf(listOf("系學會", "華山","陽明山","羽球")) }
+fun ItemList(state: MutableState<TextFieldValue>,context: Context) {
 
-    var filteredItems: List<String>
+    val searchVM = SearchViewModel()
+    val searchList = searchVM.searchList
+    var filteredItems:  MutableList<String>
     Card(colors =CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(top=70.dp)) {
             val searchedText = state.value.text
-            filteredItems = if (searchedText.isEmpty()) {
-                items
+            filteredItems = if (searchedText.isEmpty()){
+                searchList
             } else {
-                val resultList = ArrayList<String>()
-                for (item in items) {
-                    if (item.lowercase(Locale.getDefault())
-                            .contains(searchedText.lowercase(Locale.getDefault()))
-                    ) {
-                        resultList.add(item)
-                    }
-                }
+                val resultList = db_Search(searchedText,context)
                 resultList
             }
             items(filteredItems) { filteredItem ->
@@ -125,7 +124,7 @@ fun SearchPreview() {
             val textState = remember { mutableStateOf(TextFieldValue("")) }
             Column {
                 SearchScreen(textState){}
-                ItemList(state = textState)
+                ItemList(state = textState,LocalContext.current)
             }
         }
     }

@@ -91,7 +91,7 @@ fun MainScreen(
                     SearchScreen(textState) { showAlertDialog = false }
                 }
             } else {
-                MTopBar("日常", { showAlertDialog = true }, "s", openDrawer)
+                MTopBar( { showAlertDialog = true }, "s", change,openDrawer)
             }
         },
 
@@ -139,12 +139,12 @@ fun MainScreen(
         }
         IconButton(onClick = {
             change.value += 1
-            change.value %= 3
+            change.value %= 2
         }, modifier = Modifier.padding(top = 770.dp, start = 170.dp)) {
             Icon(painterResource(R.drawable.resource_switch), null)
         }
         if (showAlertDialog) {
-            ItemList(state = textState)
+            ItemList(state = textState,LocalContext.current)
         }
     }
 }

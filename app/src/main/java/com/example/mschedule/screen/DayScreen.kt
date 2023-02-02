@@ -65,8 +65,7 @@ fun DayScreen(
     val scheduleVM = ScheduleViewModel()
     val scheduleList = scheduleVM.scheduleList
     Card(modifier = Modifier
-        .fillMaxWidth()
-        .size(0.dp, 900.dp),
+        .fillMaxWidth().fillMaxHeight(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
     ) {
         Column {

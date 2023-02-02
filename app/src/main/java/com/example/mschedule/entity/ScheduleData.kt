@@ -1,6 +1,7 @@
 package com.example.mschedule.entity
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
@@ -42,6 +43,9 @@ val scheduleItemList = listOf(
         schedule = mutableStateOf("日常"),
     ),
 )
+
+val searchItemList = listOf("系學會", "華山","陽明山","羽球")
+
 val tempItemList = mutableListOf(
     //TODO extract data
     ScheduleItem(

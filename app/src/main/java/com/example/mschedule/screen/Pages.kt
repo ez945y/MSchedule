@@ -40,39 +40,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun Home(openDrawer: () -> Unit) {
-    var showAlertDialog by remember { mutableStateOf(false) }
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (showAlertDialog) {
-            AlertDialog(onDismissRequest = {
-                // 點擊 彈出視窗 外的區域觸發
-                showAlertDialog = false
-            }, title = {
-                Text("Run AlertDialog")
-            }, text = {
-                Text("This is a dialog.")
-            }, confirmButton = {
-                Button(onClick = {
-                    showAlertDialog = false
-                }) {
-                    Text(text = "確認按鈕")
-                }
-            }, dismissButton = {
-                Button(onClick = { showAlertDialog = false }) {
-                    Text(text = "取消按鈕")
-                }
-            })
-        }
-        MTopBar("Home", { showAlertDialog = true }, onButtonClicked = { openDrawer() })
-        Column(modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Home Page content here.")
-        }
-    }
-}
-
-@Composable
 fun Account(openDrawer: () -> Unit) {
     var showAlertDialog by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxSize()) {
@@ -80,10 +47,10 @@ fun Account(openDrawer: () -> Unit) {
             val textState = remember { mutableStateOf(TextFieldValue("")) }
             Column {
                 SearchScreen(textState) { showAlertDialog = false }
-                ItemList(state = textState)
+                ItemList(state = textState,LocalContext.current)
             }
         } else {
-            MTopBar("會員資訊", { showAlertDialog = true }, onButtonClicked = {
+            MTopBar( { showAlertDialog = true }, onButtonClicked = {
                 openDrawer()
             })
         }

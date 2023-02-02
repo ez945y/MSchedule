@@ -1,17 +1,11 @@
 package com.example.mschedule
 
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,9 +15,7 @@ import com.example.mschedule.screen.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import com.example.mschedule.ui.theme.isLight
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -85,13 +77,6 @@ class MainActivity : ComponentActivity() {
                                         },
                                     )
                             }
-                            composable(DrawerScreens.Home.route) {
-                                Home(
-                                    openDrawer = {
-                                        openDrawer()
-                                    }
-                                )
-                            }
                             composable(DrawerScreens.Account.route) {
                                 LoginScreen(registerClick = {navController.navigate("Register")})
                             }
@@ -124,11 +109,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun MainPreview1() {
-    Home{}
 }

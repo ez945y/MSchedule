@@ -93,7 +93,7 @@ fun calenderScreen(
                         .padding(horizontal = 8.dp))
                 DateItem(
                     m,
-                    dayNum,
+                    localDate,
                     yearNum.value.toString(),
                     monthNum.value.toString(),
                     context,
@@ -138,7 +138,7 @@ fun WeekItem(
 @Composable
 fun DateItem(
     week: List<String>,
-    dayNum: MutableState<Int>,
+    localDate: MutableState<LocalDate>,
     year: String,
     month: String,
     context: Context,
@@ -153,7 +153,8 @@ fun DateItem(
             itemsIndexed(week) { idx, date ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.clickable {
-                        dayNum.value = date.toInt()
+                        localDate.value = sdf.parse("${year}-${month}-${date}").toInstant().atZone(
+                            ZoneId.systemDefault()).toLocalDate()
                         change.value = 1
                     }) {
                     Text(text = date,

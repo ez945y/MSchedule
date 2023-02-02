@@ -65,7 +65,7 @@ fun AddScreen(
     )
     Scaffold(
         topBar = {
-            MTopBar("新增行程", {navController.popBackStack()  }, icon = "c", openDrawer)
+            MTopBar( onSearchBarClick= {navController.popBackStack()  }, icon = "c", onButtonClicked=openDrawer)
         },
     ) { contentPadding ->
         Card(modifier = Modifier

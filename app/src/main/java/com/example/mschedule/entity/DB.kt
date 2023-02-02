@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
+import android.util.Log
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -114,7 +115,7 @@ fun db_Register(email: String, password: String, repeat: String, context: Contex
             put(FeedReaderContract.FeedEntry3.COLUMN_NAME_email, email)
             put(FeedReaderContract.FeedEntry3.COLUMN_NAME_password, password)
         }
-        val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+        val newRowId = wdb?.insert(FeedReaderContract.FeedEntry3.TABLE_NAME, null, values)
         return true
     }
     return false
@@ -123,30 +124,21 @@ fun db_Register(email: String, password: String, repeat: String, context: Contex
 fun db_Login(email: String, password: String, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.writableDatabase
+    val TAG ="RightFragment";
+    Log.d(TAG,"${email.length} ${password.length}")
     val c: Cursor =
-        rdb.rawQuery("SELECT member.password FROM member WHERE member.email ='$email'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+        rdb.rawQuery("SELECT member.password FROM member" , //WHERE member.email ='$email'
             null)
-    if (c.count!=0 && c.getString(0) == password) {
+    c.moveToNext()
+    Log.d(TAG,c.count.toString())
+    if (c.count!=0 &&
+        c.getString(0) == password) {
         return true
     }
     return false
 }
 
-fun db_Search(search:String, context: Context) : MutableList<Int>{
-    val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.writableDatabase
-    val c: Cursor =
-        rdb.rawQuery("SELECT DISTINCT itemList._id FROM itemList WHERE itemList.title ='$search' OR itemList.note ='$search'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
-            null)
-    var res = mutableListOf<Int>()
-    with(c) {
-        while (moveToNext()) {
-            res.add(c.getInt(0))
-        }
-    }
-    return res
 
-}
 
 fun db_Add(si: ScheduleItem, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
@@ -194,7 +186,21 @@ fun db_Check(date: LocalDate, context: Context): Boolean {
     }
     return false
 }
+fun db_Search(search:String, context: Context) : MutableList<String>{
+    val dbHelper = FeedReaderDbHelper(context)
+    val rdb = dbHelper.writableDatabase
+    val c: Cursor =
+        rdb.rawQuery("SELECT itemList.title FROM itemList WHERE itemList.title like '%$search%' OR itemList.note like '%$search%'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+            null)
+    var res = mutableListOf<String>()
+    with(c) {
+        while (moveToNext()) {
+            res.add(c.getString(0))
+        }
+    }
+    return res
 
+}
 fun db_Select(date: LocalDate, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase

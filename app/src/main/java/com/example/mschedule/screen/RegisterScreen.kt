@@ -1,9 +1,6 @@
 package com.example.mschedule.screen
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -14,6 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -22,7 +21,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mschedule.entity.db_Login
+import com.example.mschedule.entity.db_Register
 import com.example.mschedule.ui.theme.MScheduleTheme
+import com.example.myapplication7.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +33,9 @@ fun RegisterScreen(back: () -> Unit) {
     var password = remember { mutableStateOf("") }
     var checkPassword = remember { mutableStateOf("") }
     var pwView = remember { mutableStateOf(true) }
-
+    val showAlertDialog = remember { mutableStateOf(false) }
+    val registerFlag = remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         ElevatedCard(modifier = Modifier
             .padding(top = 200.dp)) {
@@ -44,13 +48,13 @@ fun RegisterScreen(back: () -> Unit) {
                         .padding(start = 20.dp)
                 )
                 IconButton(
-                    onClick = { back()},
-                    modifier = Modifier.padding(start=200.dp)
+                    onClick = { back() },
+                    modifier = Modifier.padding(start = 200.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close Icon",
-                        modifier = Modifier.padding(bottom=15.dp)
+                        modifier = Modifier.padding(bottom = 15.dp)
                     )
                 }
             }
@@ -58,7 +62,7 @@ fun RegisterScreen(back: () -> Unit) {
                 value = username.value,
                 onValueChange = { username.value = it },
                 label = { Text("信箱", fontSize = 12.sp, modifier = Modifier.padding(start = 6.dp)) },
-                modifier = Modifier.padding(start = 15.dp,end = 15.dp,top=6.dp)
+                modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 6.dp)
             )
 
             TextField(
@@ -77,8 +81,9 @@ fun RegisterScreen(back: () -> Unit) {
                         modifier = Modifier.padding(end = 6.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = "Delete Icon"
+                            painterResource(id = R.drawable.hidden),
+                            contentDescription = "View Icon",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
@@ -104,21 +109,73 @@ fun RegisterScreen(back: () -> Unit) {
                         modifier = Modifier.padding(end = 6.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = "Delete Icon"
+                            painterResource(id = R.drawable.hidden),
+                            contentDescription = "View Icon",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
                 modifier = Modifier.padding(start = 15.dp, top = 15.dp, end = 15.dp)
             )
-            ElevatedButton(onClick = { /*TODO*/ },
-                modifier = Modifier.padding(top = 25.dp, start = 110.dp, bottom = 20.dp )) {
+            ElevatedButton(onClick = {
+                if (db_Register(email = username.value,
+                        password = password.value,
+                        repeat = checkPassword.value,
+                        context = context)
+                ) {
+                    registerFlag.value = true
+                    showAlertDialog.value = true
+                } else {
+                    registerFlag.value = false
+                    showAlertDialog.value = true
+                }
+            },
+                modifier = Modifier.padding(top = 25.dp, start = 110.dp, bottom = 20.dp)) {
                 Text(
                     text = "註冊",
                     textAlign = TextAlign.Center,
 
                     )
             }
+        }
+        if (showAlertDialog.value) {
+            if (registerFlag.value) {
+                AlertDialog(onDismissRequest = {
+                    // 點擊 彈出視窗 外的區域觸發
+                    showAlertDialog.value = false
+                    back()
+                }, title = {
+                    Text("註冊成功", modifier = Modifier.padding(start = 50.dp))
+                }, text = {
+                    Text("歡迎加入", modifier = Modifier.padding(start = 50.dp))
+                }, confirmButton = {
+                }, dismissButton = {
+                    Button(onClick = {
+                        showAlertDialog.value = false
+                        back()
+                    }, modifier = Modifier.padding(end = 70.dp)) {
+                        Text(text = "確認")
+                    }
+                })
+
+            } else {
+                AlertDialog(onDismissRequest = {
+                    // 點擊 彈出視窗 外的區域觸發
+                    showAlertDialog.value = false
+                }, title = {
+                    Text("註冊失敗", modifier = Modifier.padding(start = 50.dp))
+                }, text = {
+                    Text("兩次密碼不同", modifier = Modifier.padding(start = 50.dp))
+                }, confirmButton = {
+                }, dismissButton = {
+                    Button(onClick = {
+                        showAlertDialog.value = false
+                    }, modifier = Modifier.padding(end = 70.dp)) {
+                        Text(text = "確認")
+                    }
+                })
+            }
+
         }
     }
 }
