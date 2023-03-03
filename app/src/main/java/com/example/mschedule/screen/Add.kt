@@ -31,7 +31,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
-    ScheduleItem:ScheduleItem = ScheduleItem(777),
+    ScheduleItem: ScheduleItem = ScheduleItem(777),
     navController: NavController,
     dateId: String = "2023-01-28",
     openDrawer: () -> Unit,
@@ -65,7 +65,9 @@ fun AddScreen(
     )
     Scaffold(
         topBar = {
-            MTopBar( onSearchBarClick= {navController.popBackStack()  }, icon = "c", onButtonClicked=openDrawer)
+            MTopBar(onSearchBarClick = { navController.popBackStack() },
+                icon = "c",
+                onButtonClicked = openDrawer)
         },
     ) { contentPadding ->
         Card(modifier = Modifier
@@ -158,7 +160,7 @@ fun AddScreen(
                             .padding(top = 20.dp, start = 30.dp, end = 30.dp),
                         fontSize = 20.sp
                     )
-                    DropDown(ScheduleItem.isRepeat,Modifier.padding(start = 150.dp, top = 15.dp))
+                    DropDown(ScheduleItem.isRepeat, Modifier.padding(start = 150.dp, top = 15.dp))
                 }
 
                 Card(modifier = Modifier
@@ -177,7 +179,7 @@ fun AddScreen(
                             TextField(
                                 value = info.value,
                                 onValueChange = { info.value = it },
-                                placeholder={ Text(text=placeholder[idx])},
+                                placeholder = { Text(text = placeholder[idx]) },
                                 textStyle = MaterialTheme.typography.titleSmall,
                             )
 
@@ -185,8 +187,10 @@ fun AddScreen(
                     }
                 }
                 Spacer(modifier = Modifier.size(20.dp))
-                Button(onClick = { db_Add(ScheduleItem,context)
-                    navController.popBackStack()}, modifier = Modifier.padding(start=150.dp)) {
+                Button(onClick = {
+                    db_Add(ScheduleItem, context)
+                    navController.popBackStack()
+                }, modifier = Modifier.padding(start = 150.dp)) {
                     Text(text = "完成新增")
                 }
             }
@@ -201,8 +205,8 @@ fun AddScreen(
 fun CreatePreview() {
     MScheduleTheme {
         Surface {
-            AddScreen(ScheduleItem(777),rememberNavController()
-            ){}
+            AddScreen(ScheduleItem(777), rememberNavController()
+            ) {}
         }
     }
 }

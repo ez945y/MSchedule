@@ -14,10 +14,9 @@ import java.time.ZoneId
 object FeedReaderContract {
     // Table contents are grouped together in an anonymous object.
     object FeedEntry : BaseColumns {
-        const val TABLE_NAME = "scheduleList"
-        const val COLUMN_NAME_year = "year"
-        const val COLUMN_NAME_moon = "moon"
-        const val COLUMN_NAME_date = "date"
+        const val TABLE_NAME = "history"
+        const val COLUMN_NAME_text= "text"
+        const val COLUMN_NAME_time = "time"
     }
 
     object FeedEntry2 : BaseColumns {
@@ -39,14 +38,14 @@ object FeedReaderContract {
         const val COLUMN_NAME_email = "email"
         const val COLUMN_NAME_password = "password"
     }
+
 }
 
 private const val SQL_CREATE_ENTRIES =
     "CREATE TABLE ${FeedReaderContract.FeedEntry.TABLE_NAME} (" +
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
-            "${FeedReaderContract.FeedEntry.COLUMN_NAME_year} TEXT," +
-            "${FeedReaderContract.FeedEntry.COLUMN_NAME_moon} TEXT," +
-            "${FeedReaderContract.FeedEntry.COLUMN_NAME_date} TEXT);"
+            "${FeedReaderContract.FeedEntry.COLUMN_NAME_text} TEXT," +
+            "${FeedReaderContract.FeedEntry.COLUMN_NAME_time} TEXT);"
 
 
 private const val SQL_CREATE_ENTRIES2 =
@@ -158,6 +157,32 @@ fun db_Add(si: ScheduleItem, context: Context) {
         val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
 }
 
+fun db_Replace(si: ScheduleItem, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val wdb = dbHelper.writableDatabase
+    val values = ContentValues().apply {
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime, si.startTime.value.toString())
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime, si.endTime.value.toString())
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_clock, si.clock.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay, si.isAllDay.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat, si.isRepeat.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_member, si.member.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule, si.schedule.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_tag, si.tag.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_note, si.note.value)
+    }
+    val c: Cursor =
+        wdb.rawQuery("SELECT * FROM itemList WHERE itemList._id = '${si.id}'",
+            null)
+    if(c.count>0){
+        wdb.execSQL("DELETE FROM itemList WHERE itemList._id = '${si.id}'")
+    }
+
+    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+    c.close()
+}
+
 fun db_ReStart(context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val db = dbHelper.writableDatabase
@@ -179,25 +204,92 @@ fun db_Check(date: LocalDate, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery("SELECT * FROM itemList WHERE itemList.startTime ='$date'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+        rdb.rawQuery(
+            "SELECT * FROM itemList WHERE '$date' >= itemList.startTime AND '$date' <= itemList.endTime OR " +
+                    "itemList.isRepeat = 1 OR " +
+                    "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endTime) As Integer) % 7= 0)) OR " +
+                    "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endTime)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endTime ) % 7)= 0) OR
+                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endTime) AND strftime('%m','$date') = strftime('%m',itemList.endTime))",
             null)
     if (c.count > 0) {
         return true
     }
+    c.close()
     return false
 }
-fun db_Search(search:String, context: Context) : MutableList<String>{
+fun db_History(context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.writableDatabase
+    val rdb = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery("SELECT itemList.title FROM itemList WHERE itemList.title like '%$search%' OR itemList.note like '%$search%'", //WHERE $date >= itemList.startTime AND $date <= itemList.startTime
+        rdb.rawQuery("SELECT * FROM history ORDER BY history.time, history._id DESC",
             null)
-    var res = mutableListOf<String>()
-    with(c) {
-        while (moveToNext()) {
-            res.add(c.getString(0))
+    searchItemList.removeAll(searchItemList)
+    if (c.count != 0) {
+        Log.d("Count", c.count.toString())
+        with(c) {
+            moveToFirst()
+            while (!isAfterLast) {
+                searchItemList.add(getString(1).orEmpty())
+                Log.d("ER",getString(2).orEmpty())
+                moveToNext()
+            }
         }
     }
+    c.close()
+
+}
+
+fun db_AddHistory(search:String, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val wdb = dbHelper.writableDatabase
+    val values = ContentValues().apply {
+        put(FeedReaderContract.FeedEntry.COLUMN_NAME_text, search)
+        put(FeedReaderContract.FeedEntry.COLUMN_NAME_time, LocalDate.now().toString())
+    }
+    val c: Cursor =
+        wdb.rawQuery("SELECT * FROM history WHERE history.text = '$search'",
+            null)
+    if(c.count>0){
+        wdb.execSQL("DELETE FROM history WHERE history.text = '$search'")
+    }
+
+    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values)
+    c.close()
+}
+
+fun db_Search(search:String, context: Context) : MutableList<ScheduleItem>{
+    val dbHelper = FeedReaderDbHelper(context)
+    val rdb = dbHelper.readableDatabase
+        val c: Cursor =
+        rdb.rawQuery("SELECT * FROM itemList WHERE (itemList.title LIKE '%$search%') OR (itemList.note LIKE '%$search%')",
+            null)
+    Log.d("dd" ,"SELECT * FROM itemList WHERE (itemList.title like '%$search%')")
+
+    var res = mutableListOf<ScheduleItem>()
+    Log.d("FF","${c.count}")
+    if (c.count != 0) {
+        with(c) {
+            moveToFirst()
+            while (!isAfterLast) {
+                var item = ScheduleItem(id = getString(0).toInt())
+                item.title.value = getString(1).orEmpty()
+                item.startTime.value = sdf.parse(getString(2)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+                item.endTime.value = sdf.parse(getString(3)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+                item.clock.value = ""
+                item.isAllDay.value = getInt(5) > 0
+                item.isRepeat.value = getInt(6)
+                item.member.value = getString(7).orEmpty()
+                item.schedule.value = getString(8).orEmpty()
+                item.tag.value = getString(9).orEmpty()
+                item.note.value = getString(10).orEmpty()
+                res.add(item)
+                moveToNext()
+            }
+        }
+    }
+    c.close()
     return res
 
 }
@@ -205,7 +297,12 @@ fun db_Select(date: LocalDate, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery("SELECT * FROM itemList WHERE itemList.startTime ='$date'", //WHERE ('$date' >= itemList.startTime AND '$date' <= itemList.startTime) OR MOD( ('$date' - itemList.endTime ), itemList.isRepeat )= 0
+        rdb.rawQuery(
+            "SELECT * FROM itemList WHERE '$date' >= itemList.startTime AND '$date' <= itemList.endTime OR " +
+                "itemList.isRepeat = 1 OR " +
+                "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endTime) As Integer) % 7= 0)) OR " +
+                "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endTime)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endTime ) % 7)= 0) OR
+            "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endTime) AND strftime('%m','$date') = strftime('%m',itemList.endTime))",
             null)
     tempItemList.removeAll(tempItemList)
     if (c.count != 0) {
@@ -231,6 +328,7 @@ fun db_Select(date: LocalDate, context: Context) {
         }
     }
     c.close()
+    rdb.close()
 }
 
 /*

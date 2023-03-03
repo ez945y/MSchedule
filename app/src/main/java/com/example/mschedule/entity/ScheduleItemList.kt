@@ -43,6 +43,8 @@ class ScheduleViewModel() : ViewModel() { //items: List<ScheduleItem>
 
 }
 
+val searchItemList = mutableListOf("系學會", "華山","陽明山","羽球")
+
 class SearchViewModel() : ViewModel() { //items: List<ScheduleItem>
 
     private fun getSearch(): SnapshotStateList<String> {

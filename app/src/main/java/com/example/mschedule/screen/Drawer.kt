@@ -1,9 +1,9 @@
 package com.example.mschedule.screen
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -12,7 +12,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.myapplication7.R
+import com.example.mschedule.R
+import com.example.mschedule.entity.db_ReStart
 
 sealed class DrawerScreens(val title: String, val route: String) {
     object Main : DrawerScreens("行事曆", "Main")
@@ -37,6 +38,7 @@ private val screens = listOf(
 fun Drawer(
     modifier: Modifier = Modifier,
     onDestinationClicked: (route: String) -> Unit,
+    context: Context,
 ) {
     Card(modifier = Modifier.padding(end = 50.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
@@ -49,13 +51,16 @@ fun Drawer(
                 Icon(painterResource(id = R.drawable.menu),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.background,
-                    modifier = Modifier.size(24.dp).padding(top = 3.dp))
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(top = 3.dp))
                 Spacer(modifier = Modifier.padding(4.dp))
                 Text("選單",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.background,
-                    modifier = Modifier.padding(end = 10.dp))
+                    modifier = Modifier.padding(start = 10.dp))
+                Text("清空", modifier = Modifier.padding(start = 180.dp).clickable {db_ReStart(context) })
             }
             Card(modifier = Modifier.padding(top = 20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)) {

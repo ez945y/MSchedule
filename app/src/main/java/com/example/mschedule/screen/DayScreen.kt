@@ -39,7 +39,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayScreen(
     localDate: MutableState<LocalDate>,
@@ -149,7 +148,8 @@ fun ScheduleItemDisplay(
             shape = CircleShape
         )
         Card(modifier = Modifier
-            .fillMaxWidth().padding(horizontal = 16.dp)) {
+            .fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
             Row(
                 modifier = Modifier
                     .padding(vertical = 6.dp)

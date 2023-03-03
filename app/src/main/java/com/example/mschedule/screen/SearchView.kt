@@ -1,10 +1,12 @@
 package com.example.mschedule.screen
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -19,9 +21,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mschedule.entity.ScheduleViewModel
-import com.example.mschedule.entity.SearchViewModel
-import com.example.mschedule.entity.db_Search
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.entity.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.util.*
 
@@ -30,6 +32,7 @@ import java.util.*
 @Composable
 fun SearchScreen(
     state: MutableState<TextFieldValue>,
+    navController: NavController = rememberNavController(),
     back: () -> Unit,
 ) {
     TextField(
@@ -62,7 +65,7 @@ fun SearchScreen(
                 )
             }
         },
-        placeholder = {Text("輸入關鍵字搜尋")},
+        placeholder = { Text("輸入關鍵字搜尋") },
         singleLine = true,
         shape = RectangleShape, // The TextFiled has rounded corners top left and right by default
         colors = TextFieldDefaults.textFieldColors(
@@ -77,26 +80,50 @@ fun SearchScreen(
 }
 
 @Composable
-fun ItemList(state: MutableState<TextFieldValue>,context: Context) {
-
+fun ItemList(state: MutableState<TextFieldValue>, context: Context,navController: NavController= rememberNavController()) {
     val searchVM = SearchViewModel()
     val searchList = searchVM.searchList
-    var filteredItems:  MutableList<String>
-    Card(colors =CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
-        LazyColumn(modifier = Modifier.fillMaxWidth().padding(top=70.dp)) {
+    var filteredItems: MutableList<ScheduleItem>
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
+        LazyColumn(modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 130.dp)) {
             val searchedText = state.value.text
-            filteredItems = if (searchedText.isEmpty()){
-                searchList
-            } else {
-                val resultList = db_Search(searchedText,context)
-                resultList
-            }
-            items(filteredItems) { filteredItem ->
-                ItemListItem(
-                    ItemText = filteredItem,
-                    onItemClick = { /*Click event code needs to be implement*/
+            if (searchedText.isNotEmpty()) {
+                filteredItems = db_Search(searchedText, context)
+                itemsIndexed(filteredItems ) { idx, filteredItem ->
+                    Row(
+                        modifier = Modifier
+                            .clickable(onClick = {
+                                db_AddHistory(searchedText,context)
+                                navController.navigate("Edit/$idx")
+                            })
+                            .height(57.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = "—  ${filteredItem.title.value}",
+                            fontSize = 18.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(start = 28.dp))
                     }
-                )
+                }
+            }else{
+                db_History(context)
+                itemsIndexed(searchList ) { idx, Item ->
+                    Row(
+                        modifier = Modifier
+                            .clickable(onClick = {
+                                state.value = TextFieldValue(searchList[idx])
+                            })
+                            .height(57.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = "—  $Item",
+                            fontSize = 18.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(start = 28.dp))
+                    }
+                }
             }
         }
         Spacer(modifier = Modifier.padding(2.dp))
@@ -105,14 +132,17 @@ fun ItemList(state: MutableState<TextFieldValue>,context: Context) {
 
 
 @Composable
-fun ItemListItem(ItemText: String, onItemClick: (String) -> Unit) {
+fun ItemListItem(Item:ScheduleItem, navController: NavController,idx:Int) {
     Row(
         modifier = Modifier
-            .clickable(onClick = { onItemClick(ItemText) })
+            .clickable(onClick = {navController.navigate("Edit/$idx")})
             .height(57.dp)
             .fillMaxWidth()
     ) {
-        Text(text = "—  $ItemText", fontSize = 18.sp, color = Color.Black, modifier = Modifier.padding(start = 28.dp))
+        Text(text = "—  ${Item.title.value}",
+            fontSize = 18.sp,
+            color = Color.Black,
+            modifier = Modifier.padding(start = 28.dp))
     }
 }
 
@@ -123,8 +153,8 @@ fun SearchPreview() {
         Surface {
             val textState = remember { mutableStateOf(TextFieldValue("")) }
             Column {
-                SearchScreen(textState){}
-                ItemList(state = textState,LocalContext.current)
+                SearchScreen(textState) {}
+                ItemList(state = textState, LocalContext.current,navController = rememberNavController())
             }
         }
     }

@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.entity.db_Replace
 import com.example.mschedule.entity.tempItemList
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.time.format.DateTimeFormatter
@@ -29,7 +30,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
-    id:String= "1",
+    id: String = "1",
     navController: NavController,
     openDrawer: () -> Unit,
 
@@ -57,7 +58,9 @@ fun EditScreen(
     )
     Scaffold(
         topBar = {
-            MTopBar ( onSearchBarClick={navController.popBackStack()}, icon = "c", onButtonClicked=openDrawer)
+            MTopBar(onSearchBarClick = { navController.popBackStack() },
+                icon = "c",
+                onButtonClicked = openDrawer)
         },
     ) { contentPadding ->
         Card(modifier = Modifier
@@ -71,7 +74,7 @@ fun EditScreen(
                     .fillMaxWidth()
                     .size(0.dp, 185.dp)
                     .padding(start = 16.dp, end = 16.dp, top = 20.dp)) {
-                    Column{
+                    Column {
                         Row {
                             Icon(Icons.Filled.List,
                                 contentDescription = null,
@@ -149,7 +152,7 @@ fun EditScreen(
                             .padding(top = 20.dp, start = 30.dp, end = 30.dp),
                         fontSize = 20.sp
                     )
-                    DropDown(scheduleItem.isRepeat,Modifier.padding(start = 150.dp, top = 15.dp))
+                    DropDown(scheduleItem.isRepeat, Modifier.padding(start = 150.dp, top = 15.dp))
                 }
 
                 Card(modifier = Modifier
@@ -168,7 +171,7 @@ fun EditScreen(
                             TextField(
                                 value = info.value,
                                 onValueChange = { info.value = it },
-                                placeholder={ Text(text=placeholder[idx])},
+                                placeholder = { Text(text = placeholder[idx]) },
                                 textStyle = MaterialTheme.typography.titleSmall,
                             )
 
@@ -176,7 +179,10 @@ fun EditScreen(
                     }
                 }
                 Spacer(modifier = Modifier.size(20.dp))
-                Button(onClick = { }, modifier = Modifier.padding(start=150.dp)) {
+                Button(onClick = {
+                    db_Replace(scheduleItem, context)
+                    navController.popBackStack()
+                }, modifier = Modifier.padding(start = 150.dp)) {
                     Text(text = "完成編輯")
                 }
             }
@@ -192,7 +198,7 @@ fun EditPreview() {
     MScheduleTheme {
         Surface {
             EditScreen(
-                "1",rememberNavController()
+                "1", rememberNavController()
             ) {}
         }
     }
@@ -201,14 +207,16 @@ fun EditPreview() {
 
 @Composable
 fun DropDown(
-    data:MutableState<Int>,
-    modifier:Modifier) {
+    data: MutableState<Int>,
+    modifier: Modifier,
+) {
     var expanded = remember {
         mutableStateOf(false)
     }
-    var text = remember {mutableStateOf("永不")}
     val items = listOf("永不", "每天", "每周", "每月", "每年")
-    val value = listOf(0, 1, 7, 30, 365)
+    val value = listOf(0, 1, 2, 3, 4)
+    var text = remember { mutableStateOf("${items[data.value]}") }
+
     Box(
         modifier = modifier
     ) {
@@ -221,9 +229,9 @@ fun DropDown(
         }
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
-            items.forEachIndexed { idx,s ->
+            items.forEachIndexed { idx, s ->
                 DropdownMenuItem(
-                    text = { Text(text = s)},
+                    text = { Text(text = s) },
                     onClick = {
                         text.value = s
                         data.value = value[idx]

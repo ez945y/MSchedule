@@ -20,7 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.entity.*
 import com.example.mschedule.ui.theme.MScheduleTheme
-import com.example.myapplication7.R
+import com.example.mschedule.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate
 import java.time.ZoneId
@@ -88,7 +88,7 @@ fun MainScreen(
                             .fillMaxWidth()
                             .size(0.dp, 37.dp))
                     }
-                    SearchScreen(textState) { showAlertDialog = false }
+                    SearchScreen(textState,navController) { showAlertDialog = false }
                 }
             } else {
                 MTopBar( { showAlertDialog = true }, "s", change,openDrawer)
@@ -144,7 +144,7 @@ fun MainScreen(
             Icon(painterResource(R.drawable.resource_switch), null)
         }
         if (showAlertDialog) {
-            ItemList(state = textState,LocalContext.current)
+            ItemList(state = textState,LocalContext.current,navController)
         }
     }
 }

@@ -1,12 +1,9 @@
 package com.example.mschedule.screen
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -23,9 +20,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mschedule.entity.db_Login
 import com.example.mschedule.ui.theme.MScheduleTheme
-import com.example.myapplication7.R
+import com.example.mschedule.R
+//import com.google.firebase.auth.FirebaseAuth
+//import com.google.firebase.auth.ktx.auth
+//import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,14 +87,15 @@ fun LoginScreen(registerClick: () -> Unit) {
                     },
                     modifier = Modifier.padding(start = 15.dp, top = 15.dp, end = 15.dp)
                 )
+                //var auth: FirebaseAuth = Firebase.auth
                 ElevatedButton(onClick = {
-                    if (db_Login(username.value, password.value, context)) {
-                        loginFlag.value = true
-                        showAlertDialog.value = true
-                    } else {
-                        loginFlag.value = false
-                        showAlertDialog.value = true
-                    }
+                    //if (auth.signInWithEmailAndPassword(username.value,password.value).isSuccessful) {
+                    //                        loginFlag.value = true
+                    //                        showAlertDialog.value = true
+                    //                    } else {
+                    //                        loginFlag.value = false
+                    //                        showAlertDialog.value = true
+                    //                    }
                 },
                     modifier = Modifier.padding(top = 25.dp, start = 110.dp)) {
                     Text(

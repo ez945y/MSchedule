@@ -1,17 +1,17 @@
 
 plugins {
-
     id 'com.google.gms.google-services'
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
 }
-
+apply plugin: 'com.google.gms.google-services'
 android {
-    namespace 'com.example.myapplication7'
+    namespace 'com.example.mschedule'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.myapplication7"
+        applicationId "com.example.mschedule"
         minSdk 26
         targetSdk 33
         versionCode 1
@@ -51,9 +51,6 @@ android {
 
 
 dependencies {
-    implementation platform('com.google.firebase:firebase-bom:31.2.0')
-    implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-auth:10.0.1'
     implementation "com.google.accompanist:accompanist-insets:0.15.0"
     implementation "com.google.accompanist:accompanist-insets-ui:0.15.0"
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.15.0"
@@ -72,4 +69,7 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
+}
+kapt {
+    correctErrorTypes = true
 }
