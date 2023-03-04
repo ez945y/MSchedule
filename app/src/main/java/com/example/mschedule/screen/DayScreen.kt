@@ -5,6 +5,9 @@ import android.content.Context
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -13,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.*
@@ -25,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,9 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.R
 import com.example.mschedule.entity.*
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -46,6 +53,7 @@ fun DayScreen(
     monthNum: MutableState<Int>,
     dayNum: MutableState<Int>,
     navController: NavController,
+    state: ScrollableState,
 ) {
     val formatter = DateTimeFormatter.ofPattern("MM月dd日 E", Locale.TAIWAN)
     val context = LocalContext.current
@@ -64,7 +72,11 @@ fun DayScreen(
     val scheduleVM = ScheduleViewModel()
     val scheduleList = scheduleVM.scheduleList
     Card(modifier = Modifier
-        .fillMaxWidth().fillMaxHeight(),
+        .fillMaxWidth()
+        .fillMaxHeight()
+        .scrollable(
+            state = state, orientation = Orientation.Horizontal,
+        ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
     ) {
         Column {
@@ -138,17 +150,15 @@ fun ScheduleItemDisplay(
 ) {
     Row(modifier = Modifier
         .padding(top = 8.dp)) {
-        OutlinedTextField(
-            value = schedule.clock.value,
-            onValueChange = { schedule.clock.value = it },
-            modifier = Modifier
-                .padding(start = 20.dp,top = 0.dp).size(45.dp, 40.dp).background(Color.White, RoundedCornerShape(8.dp)),
-            textStyle = TextStyle(fontSize = 8.sp),
-            placeholder = {Text("24:00")},
-            shape = CircleShape
+        Text(
+            text = "${schedule.startTime.value}",
+            modifier = Modifier.padding(start = 18.dp, top = 7.dp)
         )
-        Card(modifier = Modifier
-            .fillMaxWidth().padding(horizontal = 16.dp),
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
         ) {
             Row(
                 modifier = Modifier
@@ -175,22 +185,15 @@ fun ScheduleItemDisplay(
                     Icon(Icons.Filled.Edit,
                         contentDescription = null,
                         modifier = Modifier
-                            .padding(end = 30.dp)
+                            .padding(end = 20.dp)
                             .size(24.dp)
                             .clickable { navController.navigate("Edit/$idx") })
+                    Icon(
+                        Icons.Filled.Done,null,modifier = Modifier
+                            .padding(end = 20.dp))
                 }
             }
 
         }
     }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Preview
-@Composable
-fun DayPreview() {
-    DayScreen(mutableStateOf(LocalDate.now()),
-        mutableStateOf(1),
-        mutableStateOf(1),
-        mutableStateOf(1), rememberNavController())
 }

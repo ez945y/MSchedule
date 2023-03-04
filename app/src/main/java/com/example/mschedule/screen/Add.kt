@@ -12,12 +12,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.R
 import com.example.mschedule.entity.ScheduleItem
 import com.example.mschedule.entity.db_Add
 import com.example.mschedule.ui.theme.MScheduleTheme
@@ -43,8 +45,8 @@ fun AddScreen(
         mutableStateOf(sdf.parse(dateId).toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate())
     }
-    ScheduleItem.startTime.value = date.value
-    ScheduleItem.endTime.value = date.value
+    ScheduleItem.startDate.value = date.value
+    ScheduleItem.endDate.value = date.value
     val infos = listOf(
         ScheduleItem.member,
         ScheduleItem.schedule,
@@ -58,10 +60,10 @@ fun AddScreen(
         "新增備註"
     )
     val icons = listOf(
-        Icons.Filled.AccountBox,
-        Icons.Filled.MailOutline,
-        Icons.Filled.Lock,
-        Icons.Filled.Check
+        painterResource(id = R.drawable.team),
+        painterResource(id = R.drawable.notebook),
+        painterResource(id = R.drawable.tag),
+        painterResource(id = R.drawable.note)
     )
     Scaffold(
         topBar = {
@@ -100,7 +102,7 @@ fun AddScreen(
                                     .clickable {}
                                     .padding(start = 15.dp, top = 28.dp),
                                 contentDescription = null)
-                            Text(text = ScheduleItem.startTime.value.format(formatter),
+                            Text(text = ScheduleItem.startDate.value.format(formatter),
                                 textAlign = TextAlign.Center,
                                 fontSize = 20.sp,
                                 modifier = Modifier
@@ -108,9 +110,9 @@ fun AddScreen(
                                     .clickable {
                                         datePicker(true,
                                             context,
-                                            ScheduleItem.startTime.value,
+                                            ScheduleItem.startDate.value,
                                             onDateSelect = {
-                                                ScheduleItem.startTime.value = it
+                                                ScheduleItem.startDate.value = it
                                             })
                                     }
                             )
@@ -119,7 +121,7 @@ fun AddScreen(
                                     .clickable {}
                                     .padding(top = 28.dp),
                                 contentDescription = null)
-                            Text(text = ScheduleItem.endTime.value.format(formatter),
+                            Text(text = ScheduleItem.endDate.value.format(formatter),
                                 textAlign = TextAlign.Center,
                                 fontSize = 20.sp,
                                 modifier = Modifier
@@ -127,9 +129,9 @@ fun AddScreen(
                                     .clickable {
                                         datePicker(true,
                                             context,
-                                            ScheduleItem.endTime.value,
+                                            ScheduleItem.endDate.value,
                                             onDateSelect = {
-                                                ScheduleItem.endTime.value = it
+                                                ScheduleItem.endDate.value = it
                                             })
                                     }
                             )
@@ -174,7 +176,7 @@ fun AddScreen(
                             Icon(icons[idx],
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.inverseSurface,
-                                modifier = Modifier.padding(start = 16.dp, top = 16.dp))
+                                modifier = Modifier.padding(start = 16.dp, top = 16.dp).size(18.dp))
                             Spacer(modifier = Modifier.padding(4.dp))
                             TextField(
                                 value = info.value,

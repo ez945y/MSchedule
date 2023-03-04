@@ -22,7 +22,8 @@ object FeedReaderContract {
     object FeedEntry2 : BaseColumns {
         const val TABLE_NAME = "itemList"
         const val COLUMN_NAME_title = "title"
-        const val COLUMN_NAME_clock = "clock"
+        const val COLUMN_NAME_startDate = "startDate"
+        const val COLUMN_NAME_endDate = "endDate"
         const val COLUMN_NAME_startTime = "startTime"
         const val COLUMN_NAME_endTime = "endTime"
         const val COLUMN_NAME_isAllDay = "isAllDay"
@@ -52,9 +53,10 @@ private const val SQL_CREATE_ENTRIES2 =
     "CREATE TABLE ${FeedReaderContract.FeedEntry2.TABLE_NAME} (" +
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_title} TEXT," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_startDate} TEXT," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_endDate} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime} TEXT," +
-            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_clock} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay} Bool," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat} Int," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_member} TEXT," +
@@ -144,9 +146,10 @@ fun db_Add(si: ScheduleItem, context: Context) {
     val wdb = dbHelper.writableDatabase
     val values = ContentValues().apply {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startDate, si.startDate.value.toString())
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_endDate, si.endDate.value.toString())
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime, si.startTime.value.toString())
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime, si.endTime.value.toString())
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_clock, si.clock.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay, si.isAllDay.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat, si.isRepeat.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_member, si.member.value)
@@ -162,9 +165,10 @@ fun db_Replace(si: ScheduleItem, context: Context) {
     val wdb = dbHelper.writableDatabase
     val values = ContentValues().apply {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startDate, si.startDate.value.toString())
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_endDate, si.endDate.value.toString())
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime, si.startTime.value.toString())
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime, si.endTime.value.toString())
-        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_clock, si.clock.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay, si.isAllDay.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat, si.isRepeat.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_member, si.member.value)
@@ -205,11 +209,11 @@ fun db_Check(date: LocalDate, context: Context): Boolean {
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
         rdb.rawQuery(
-            "SELECT * FROM itemList WHERE '$date' >= itemList.startTime AND '$date' <= itemList.endTime OR " +
+            "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
                     "itemList.isRepeat = 1 OR " +
-                    "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endTime) As Integer) % 7= 0)) OR " +
-                    "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endTime)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endTime ) % 7)= 0) OR
-                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endTime) AND strftime('%m','$date') = strftime('%m',itemList.endTime))",
+                    "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
+                    "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
+                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate))",
             null)
     if (c.count > 0) {
         return true
@@ -273,17 +277,20 @@ fun db_Search(search:String, context: Context) : MutableList<ScheduleItem>{
             while (!isAfterLast) {
                 var item = ScheduleItem(id = getString(0).toInt())
                 item.title.value = getString(1).orEmpty()
-                item.startTime.value = sdf.parse(getString(2)).toInstant().atZone(
+                item.startDate.value = sdf.parse(getString(2)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
-                item.endTime.value = sdf.parse(getString(3)).toInstant().atZone(
+                item.endDate.value = sdf.parse(getString(3)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
-                item.clock.value = ""
-                item.isAllDay.value = getInt(5) > 0
-                item.isRepeat.value = getInt(6)
-                item.member.value = getString(7).orEmpty()
-                item.schedule.value = getString(8).orEmpty()
-                item.tag.value = getString(9).orEmpty()
-                item.note.value = getString(10).orEmpty()
+                item.startTime.value = sdf_time.parse(getString(4)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalTime()
+                item.endTime.value = sdf_time.parse(getString(5)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalTime()
+                item.isAllDay.value = getInt(6) > 0
+                item.isRepeat.value = getInt(7)
+                item.member.value = getString(8).orEmpty()
+                item.schedule.value = getString(9).orEmpty()
+                item.tag.value = getString(10).orEmpty()
+                item.note.value = getString(11).orEmpty()
                 res.add(item)
                 moveToNext()
             }
@@ -298,11 +305,11 @@ fun db_Select(date: LocalDate, context: Context) {
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
         rdb.rawQuery(
-            "SELECT * FROM itemList WHERE '$date' >= itemList.startTime AND '$date' <= itemList.endTime OR " +
+            "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
                 "itemList.isRepeat = 1 OR " +
-                "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endTime) As Integer) % 7= 0)) OR " +
-                "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endTime)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endTime ) % 7)= 0) OR
-            "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endTime) AND strftime('%m','$date') = strftime('%m',itemList.endTime))",
+                "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
+                "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
+            "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate))",
             null)
     tempItemList.removeAll(tempItemList)
     if (c.count != 0) {
@@ -312,17 +319,20 @@ fun db_Select(date: LocalDate, context: Context) {
                 //itemIds.add(itemId)
                 var item = ScheduleItem(id = getString(0).toInt())
                 item.title.value = getString(1).orEmpty()
-                item.startTime.value = sdf.parse(getString(2)).toInstant().atZone(
+                item.startDate.value = sdf.parse(getString(2)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
-                item.endTime.value = sdf.parse(getString(3)).toInstant().atZone(
+                item.endDate.value = sdf.parse(getString(3)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
-                item.clock.value = ""
-                item.isAllDay.value = getInt(5) > 0
-                item.isRepeat.value = getInt(6)
-                item.member.value = getString(7).orEmpty()
-                item.schedule.value = getString(8).orEmpty()
-                item.tag.value = getString(9).orEmpty()
-                item.note.value = getString(10).orEmpty()
+                item.startTime.value = sdf_time.parse(getString(4)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalTime()
+                item.endTime.value = sdf_time.parse(getString(5)).toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalTime()
+                item.isAllDay.value = getInt(6) > 0
+                item.isRepeat.value = getInt(7)
+                item.member.value = getString(8).orEmpty()
+                item.schedule.value = getString(9).orEmpty()
+                item.tag.value = getString(10).orEmpty()
+                item.note.value = getString(11).orEmpty()
                 tempItemList.add(item)
             }
         }

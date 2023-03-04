@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat
 import java.time.ZoneId
 
 val sdf = SimpleDateFormat("yyyy-MM-dd")
+val sdf_time = SimpleDateFormat("HH:mm")
 
 
 val tempItemList = mutableListOf(
@@ -16,9 +17,9 @@ val tempItemList = mutableListOf(
     ScheduleItem(
         id = 3,
         title = mutableStateOf("測試"),
-        startTime = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
+        startDate = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate()),
-        endTime = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
+        endDate = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate()),
         member = mutableStateOf("您"),
         schedule = mutableStateOf("日常"),
@@ -26,9 +27,9 @@ val tempItemList = mutableListOf(
     ScheduleItem(
         id = 4,
         title = mutableStateOf("測試2"),
-        startTime = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
+        startDate = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate()),
-        endTime = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
+        endDate = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate()),
         member = mutableStateOf("您"),
         schedule = mutableStateOf("日常"),
@@ -36,9 +37,9 @@ val tempItemList = mutableListOf(
     ScheduleItem(
         id = 5,
         title = mutableStateOf("測試3"),
-        startTime = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
+        startDate = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate()),
-        endTime = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
+        endDate = mutableStateOf(sdf.parse("2023-01-25").toInstant().atZone(
             ZoneId.systemDefault()).toLocalDate()),
         member = mutableStateOf("您"),
         schedule = mutableStateOf("日常"),

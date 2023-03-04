@@ -2,6 +2,9 @@ package com.example.mschedule.screen
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircle
@@ -34,6 +37,7 @@ fun simpleScreen(
     monthNum: MutableState<Int>,
     dayNum: MutableState<Int>,
     navController: NavController,
+    state: ScrollableState,
 ) {
     val formatter = DateTimeFormatter.ofPattern("MM月dd日 E", Locale.TAIWAN)
     val context = LocalContext.current
@@ -54,7 +58,10 @@ fun simpleScreen(
     var index = remember { mutableStateOf(0) }
     Card(modifier = Modifier
         .fillMaxWidth()
-        .fillMaxHeight(),
+        .fillMaxHeight()
+        .scrollable(
+            state = state, orientation = Orientation.Horizontal,
+        ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
     ) {
         Column {
@@ -114,7 +121,7 @@ fun simpleScreen(
                             }
                         }
                     }
-                    if (tempList.size > 2 && index.value < tempList.size - 1) {
+                    if (tempList.size > 1 && index.value < tempList.size - 1) {
                         Card(modifier = Modifier
                             .padding(start = 60.dp, end = 60.dp, top = 350.dp)
                             .fillMaxWidth()
@@ -133,7 +140,7 @@ fun simpleScreen(
                     }
                     Card(modifier = Modifier
                         .padding(top = 70.dp, start = 30.dp, end = 30.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth().clickable { navController.navigate("Edit/${index.value}")  },
                         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 20.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -149,29 +156,17 @@ fun simpleScreen(
                                 thickness = 1.dp,
                                 modifier = Modifier
                                     .padding(horizontal = 50.dp))
-                            Text("${tempList[index.value].note.value}", modifier = Modifier
-                                .padding(top = 25.dp, bottom = 25.dp), fontSize = 24.sp)
+                            if (tempList[index.value].note.value !=""){
+                                Text("${tempList[index.value].note.value}", modifier = Modifier
+                                    .padding(top = 25.dp, bottom = 25.dp), fontSize = 24.sp)
+                            }else{
+                                Text("尚無備註", modifier = Modifier
+                                    .padding(top = 25.dp, bottom = 25.dp), fontSize = 24.sp)
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Preview
-@Composable
-fun simplePreview() {
-    MScheduleTheme {
-        Surface {
-            simpleScreen(
-                mutableStateOf(LocalDate.now()),
-                mutableStateOf(1),
-                mutableStateOf(1),
-                mutableStateOf(1),
-                rememberNavController())
-        }
-    }
-
 }

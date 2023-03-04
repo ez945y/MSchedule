@@ -1,6 +1,7 @@
 package com.example.mschedule.screen
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -23,6 +24,7 @@ import com.example.mschedule.ui.theme.MScheduleTheme
 import com.example.mschedule.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -57,7 +59,7 @@ fun MainScreen(
     val horizontalCount = remember {
         mutableStateOf(0.0)
     }
-    val state = rememberScrollableState {
+    val stateMonth = rememberScrollableState {
         horizontalCount.value += it
         if (horizontalCount.value < -400.0 && monthNum.value < 12) {
             monthNum.value += 1
@@ -71,6 +73,26 @@ fun MainScreen(
             localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
                 ZoneId.systemDefault()).toLocalDate()
             horizontalCount.value = 0.0
+
+        }
+        it
+    }
+    val stateDate = rememberScrollableState {
+        horizontalCount.value += it
+        if (horizontalCount.value < -400.0 && dayNum.value < 12) {
+            dayNum.value += 1
+            localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                ZoneId.systemDefault()).toLocalDate()
+            horizontalCount.value = 0.0
+            db_Select(localDate.value,context)
+
+        }
+        if (horizontalCount.value > 400.0 && dayNum.value > 1) {
+            dayNum.value -= 1
+            localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                ZoneId.systemDefault()).toLocalDate()
+            horizontalCount.value = 0.0
+            db_Select(localDate.value,context)
         }
         it
     }
@@ -99,7 +121,7 @@ fun MainScreen(
         Box(modifier = Modifier.padding(contentPadding)) {
             if (change.value == 0) {
                 simpleScreen(localDate, yearNum, monthNum, dayNum,
-                    navController = navController)
+                    navController = navController,state = stateDate,)
             } else {
                 if (change.value == 1) {
                     DayScreen(
@@ -108,6 +130,7 @@ fun MainScreen(
                         monthNum = monthNum,
                         dayNum = dayNum,
                         navController = navController,
+                        state = stateDate,
                     )
                 } else {
                     calenderScreen(
@@ -117,8 +140,8 @@ fun MainScreen(
                         dayNum = dayNum,
                         context = context,
                         month = month,
-                        state = state,
-                        change = change)
+                        state = stateMonth,
+                        change = change,)
                 }
             }
 
@@ -159,11 +182,28 @@ fun datePicker(
     val listener = DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
         onDateSelect(LocalDate.of(year, monthOfYear+1, dayOfMonth))
     }
-    val datePickerDialog = DatePickerDialog(context, listener, //設置監聽，當選擇日期時要做的處理
-        date.year, date.monthValue-1, date.dayOfMonth)//設置預設日期
+    val datePickerDialog = DatePickerDialog(context, listener,
+        date.year, date.monthValue-1, date.dayOfMonth)
 
     if (showFlag) {
         datePickerDialog.show()
+    }
+}
+
+fun timePicker(
+    showFlag: Boolean,
+    context: Context,
+    time: LocalTime,
+    onTimeSelect: (LocalTime) -> Unit,
+) {
+    val listener = TimePickerDialog.OnTimeSetListener { _, hour, minute ->
+        onTimeSelect(LocalTime.of(hour, minute))
+    }
+    val timePickerDialog = TimePickerDialog(context, listener,
+        time.hour,time.minute, true)//設置預設日期
+
+    if (showFlag) {
+        timePickerDialog.show()
     }
 }
 

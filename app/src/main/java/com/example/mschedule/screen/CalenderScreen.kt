@@ -20,8 +20,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.mschedule.R
 import com.example.mschedule.entity.db_Check
 import com.example.mschedule.entity.sdf
 import java.time.LocalDate
@@ -120,7 +122,7 @@ fun WeekItem(
     ) {
         LazyRow(modifier = Modifier
             .padding(8.dp)
-            .padding(vertical = 6.dp)
+            .padding(vertical = 2.dp)
             .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically) {
@@ -166,13 +168,13 @@ fun DateItem(
                             Color.Unspecified
                         })
                     Column {
-                        Box(modifier = Modifier.size(40.dp, 56.dp),
+                        Box(modifier = Modifier.size(40.dp, 40.dp),
                             contentAlignment = Alignment.Center) {
 
                             if (db_Check(sdf.parse("$year-$month-$date").toInstant()
                                     .atZone(ZoneId.systemDefault()).toLocalDate(), context)
                             ) {
-                                Icon(Icons.Filled.Done, null)
+                                Icon(painterResource(id = R.drawable.check), null, modifier = Modifier.size(12.dp))
                             }
 
                         }
