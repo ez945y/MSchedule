@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.mschedule.R
 import com.example.mschedule.entity.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.util.*
@@ -32,7 +34,6 @@ import java.util.*
 @Composable
 fun SearchScreen(
     state: MutableState<TextFieldValue>,
-    navController: NavController = rememberNavController(),
     back: () -> Unit,
 ) {
     TextField(
@@ -80,31 +81,41 @@ fun SearchScreen(
 }
 
 @Composable
-fun ItemList(state: MutableState<TextFieldValue>, context: Context,navController: NavController= rememberNavController()) {
+fun ItemList(state: MutableState<TextFieldValue>, context: Context,navController: NavController= rememberNavController(),back: () -> Unit) {
     val searchVM = SearchViewModel()
-    val searchList = searchVM.searchList
+    var searchList = searchVM.searchList
     var filteredItems: MutableList<ScheduleItem>
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
         LazyColumn(modifier = Modifier
             .fillMaxWidth()
             .padding(top = 130.dp)) {
             val searchedText = state.value.text
+
             if (searchedText.isNotEmpty()) {
                 filteredItems = db_Search(searchedText, context)
                 itemsIndexed(filteredItems ) { idx, filteredItem ->
                     Row(
                         modifier = Modifier
                             .clickable(onClick = {
-                                db_AddHistory(searchedText,context)
+                                db_AddHistory(searchedText, context)
                                 navController.navigate("Edit/$idx")
                             })
                             .height(57.dp)
                             .fillMaxWidth()
                     ) {
-                        Text(text = "—  ${filteredItem.title.value}",
-                            fontSize = 18.sp,
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "",
+                            modifier = Modifier
+                                .padding(start = 16.dp, top = 3.dp)
+                                .size(25.dp)
+                        )
+                        Text(text = "${filteredItem.title.value}",
+                            fontSize = 16.sp,
                             color = Color.Black,
-                            modifier = Modifier.padding(start = 28.dp))
+                            modifier = Modifier
+                                .padding(start = 18.dp)
+                                .size(294.dp, 25.dp))
                     }
                 }
             }else{
@@ -118,10 +129,32 @@ fun ItemList(state: MutableState<TextFieldValue>, context: Context,navController
                             .height(57.dp)
                             .fillMaxWidth()
                     ) {
-                        Text(text = "—  $Item",
-                            fontSize = 18.sp,
+                        Icon(
+                            painterResource(id = R.drawable.history),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .padding(start = 16.dp, top = 3.dp)
+                                .size(25.dp)
+                        )
+                        Text(text = "$Item",
+                            fontSize = 16.sp,
                             color = Color.Black,
-                            modifier = Modifier.padding(start = 28.dp))
+                            modifier = Modifier
+                                .padding(start = 18.dp)
+                                .size(294.dp, 25.dp))
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "",
+                            modifier = Modifier
+                                .padding(top = 3.dp)
+                                .size(25.dp)
+                                .clickable {
+                                    db_deleteHistory(Item, context)
+                                    state.value = TextFieldValue(searchList[idx])
+                                    state.value = TextFieldValue("")
+                                    //back()
+                                }
+                        )
                     }
                 }
             }
@@ -135,7 +168,7 @@ fun ItemList(state: MutableState<TextFieldValue>, context: Context,navController
 fun ItemListItem(Item:ScheduleItem, navController: NavController,idx:Int) {
     Row(
         modifier = Modifier
-            .clickable(onClick = {navController.navigate("Edit/$idx")})
+            .clickable(onClick = { navController.navigate("Edit/$idx") })
             .height(57.dp)
             .fillMaxWidth()
     ) {
@@ -146,16 +179,3 @@ fun ItemListItem(Item:ScheduleItem, navController: NavController,idx:Int) {
     }
 }
 
-@Preview
-@Composable
-fun SearchPreview() {
-    MScheduleTheme {
-        Surface {
-            val textState = remember { mutableStateOf(TextFieldValue("")) }
-            Column {
-                SearchScreen(textState) {}
-                ItemList(state = textState, LocalContext.current,navController = rememberNavController())
-            }
-        }
-    }
-}

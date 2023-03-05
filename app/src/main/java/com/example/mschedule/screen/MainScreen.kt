@@ -36,7 +36,14 @@ fun MainScreen(
     navController: NavController,
     openDrawer: () -> Unit,
 ) {
-    val localDate = remember { mutableStateOf(LocalDate.now()) }
+    val localDate = if (globalDate.value == "") {
+        remember { mutableStateOf(LocalDate.now()) }
+    } else {
+        remember { mutableStateOf(
+            sdf.parse(globalDate.value).toInstant().atZone(
+                ZoneId.systemDefault()).toLocalDate()
+        ) }
+    }
     val formatterMonth = DateTimeFormatter.ofPattern("MM", Locale.TAIWAN)
     val formatterYear = DateTimeFormatter.ofPattern("yyyy", Locale.TAIWAN)
     val formatterDay = DateTimeFormatter.ofPattern("dd", Locale.TAIWAN)
@@ -63,15 +70,19 @@ fun MainScreen(
         horizontalCount.value += it
         if (horizontalCount.value < -400.0 && monthNum.value < 12) {
             monthNum.value += 1
-            localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                ZoneId.systemDefault()).toLocalDate()
+            localDate.value =
+                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+            globalDate.value = localDate.value.format(formatterGobal)
             horizontalCount.value = 0.0
 
         }
         if (horizontalCount.value > 400.0 && monthNum.value > 1) {
             monthNum.value -= 1
-            localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                ZoneId.systemDefault()).toLocalDate()
+            localDate.value =
+                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+            globalDate.value = localDate.value.format(formatterGobal)
             horizontalCount.value = 0.0
 
         }
@@ -81,18 +92,22 @@ fun MainScreen(
         horizontalCount.value += it
         if (horizontalCount.value < -400.0 && dayNum.value < 12) {
             dayNum.value += 1
-            localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                ZoneId.systemDefault()).toLocalDate()
+            localDate.value =
+                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+            globalDate.value = localDate.value.format(formatterGobal)
             horizontalCount.value = 0.0
-            db_Select(localDate.value,context)
+            db_Select(localDate.value, context)
 
         }
         if (horizontalCount.value > 400.0 && dayNum.value > 1) {
             dayNum.value -= 1
-            localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                ZoneId.systemDefault()).toLocalDate()
+            localDate.value =
+                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+            globalDate.value = localDate.value.format(formatterGobal)
             horizontalCount.value = 0.0
-            db_Select(localDate.value,context)
+            db_Select(localDate.value, context)
         }
         it
     }
@@ -110,18 +125,20 @@ fun MainScreen(
                             .fillMaxWidth()
                             .size(0.dp, 37.dp))
                     }
-                    SearchScreen(textState,navController) { showAlertDialog = false }
+                    SearchScreen(textState) { showAlertDialog = false }
                 }
             } else {
-                MTopBar( { showAlertDialog = true }, "s", change,openDrawer)
+                MTopBar({ showAlertDialog = true }, "s", change, openDrawer)
             }
         },
 
         ) { contentPadding ->
         Box(modifier = Modifier.padding(contentPadding)) {
             if (change.value == 0) {
-                simpleScreen(localDate, yearNum, monthNum, dayNum,
-                    navController = navController,state = stateDate,)
+                simpleScreen(
+                    localDate, yearNum, monthNum, dayNum,
+                    navController = navController, state = stateDate,
+                )
             } else {
                 if (change.value == 1) {
                     DayScreen(
@@ -141,7 +158,8 @@ fun MainScreen(
                         context = context,
                         month = month,
                         state = stateMonth,
-                        change = change,)
+                        change = change,
+                    )
                 }
             }
 
@@ -167,7 +185,8 @@ fun MainScreen(
             Icon(painterResource(R.drawable.resource_switch), null)
         }
         if (showAlertDialog) {
-            ItemList(state = textState,LocalContext.current,navController)
+            ItemList(state = textState, LocalContext.current, navController) {showAlertDialog = false
+                showAlertDialog = true}
         }
     }
 }
@@ -180,10 +199,10 @@ fun datePicker(
     onDateSelect: (LocalDate) -> Unit,
 ) {
     val listener = DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
-        onDateSelect(LocalDate.of(year, monthOfYear+1, dayOfMonth))
+        onDateSelect(LocalDate.of(year, monthOfYear + 1, dayOfMonth))
     }
     val datePickerDialog = DatePickerDialog(context, listener,
-        date.year, date.monthValue-1, date.dayOfMonth)
+        date.year, date.monthValue - 1, date.dayOfMonth)
 
     if (showFlag) {
         datePickerDialog.show()
@@ -200,7 +219,7 @@ fun timePicker(
         onTimeSelect(LocalTime.of(hour, minute))
     }
     val timePickerDialog = TimePickerDialog(context, listener,
-        time.hour,time.minute, true)//設置預設日期
+        time.hour, time.minute, true)//設置預設日期
 
     if (showFlag) {
         timePickerDialog.show()

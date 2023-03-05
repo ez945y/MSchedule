@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -14,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.mschedule.R
 import com.example.mschedule.entity.db_ReStart
+import com.example.mschedule.entity.db_delete
 
 sealed class DrawerScreens(val title: String, val route: String) {
     object Main : DrawerScreens("行事曆", "Main")
@@ -40,6 +43,7 @@ fun Drawer(
     onDestinationClicked: (route: String) -> Unit,
     context: Context,
 ) {
+    var showAlertDialog = remember { mutableStateOf(false) }
     Card(modifier = Modifier.padding(end = 50.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
         Column(
@@ -60,8 +64,9 @@ fun Drawer(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.background,
                     modifier = Modifier.padding(start = 10.dp))
-                Text("清空", modifier = Modifier.padding(start = 180.dp).clickable {db_ReStart(context) })
+                Text("清空", modifier = Modifier.padding(start = 180.dp).clickable {showAlertDialog.value = true})
             }
+
             Card(modifier = Modifier.padding(top = 20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)) {
                 Row(modifier = Modifier.padding(10.dp)) {
@@ -129,6 +134,38 @@ fun Drawer(
             }
             Divider(color = MaterialTheme.colorScheme.background,
                 thickness = 1.dp, modifier = Modifier.padding(top = 40.dp))
+        }
+        if (showAlertDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    showAlertDialog.value = false;
+                },
+                title = {
+                    Text("確認")
+                },
+                text = {
+                    Text("請問是否要重置資料庫")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            db_ReStart(context)
+                            showAlertDialog.value = false
+                        },
+                        modifier = Modifier.padding()
+                    )
+                    {
+                        Text(text = "確認")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showAlertDialog.value = false },
+                        modifier = Modifier.padding(end = 50.dp))
+                    {
+                        Text(text = "取消")
+                    }
+                }
+            )
         }
     }
 }

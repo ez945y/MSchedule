@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.mschedule.R
 import com.example.mschedule.entity.db_Check
+import com.example.mschedule.entity.formatterGobal
+import com.example.mschedule.entity.globalDate
 import com.example.mschedule.entity.sdf
 import java.time.LocalDate
 import java.time.ZoneId
@@ -60,7 +62,8 @@ fun calenderScreen(
             Icon(Icons.Filled.ArrowBack,
                 modifier = Modifier.clickable { monthNum.value -= 1
                     localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                        ZoneId.systemDefault()).toLocalDate()},
+                        ZoneId.systemDefault()).toLocalDate()
+                    globalDate.value = localDate.value.format(formatterGobal)},
                 contentDescription = null)
             Text(text = "${yearNum.value}年 ${monthNum.value} 月",
                 textAlign = TextAlign.Center,
@@ -74,7 +77,8 @@ fun calenderScreen(
             Icon(Icons.Filled.ArrowForward,
                 modifier = Modifier.clickable { monthNum.value += 1
                     localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                        ZoneId.systemDefault()).toLocalDate()},
+                        ZoneId.systemDefault()).toLocalDate()
+                    globalDate.value = localDate.value.format(formatterGobal)},
                 contentDescription = null)
         }
         Divider(color = MaterialTheme.colorScheme.secondary,
@@ -153,31 +157,42 @@ fun DateItem(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically) {
             itemsIndexed(week) { idx, date ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable {
-                        localDate.value = sdf.parse("${year}-${month}-${date}").toInstant().atZone(
-                            ZoneId.systemDefault()).toLocalDate()
-                        change.value = 1
-                    }) {
-                    Text(text = date,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 2.dp),
-                        color = if (idx == 0 || idx == 6) {
-                            Color.Red
-                        } else {
-                            Color.Unspecified
-                        })
-                    Column {
-                        Box(modifier = Modifier.size(40.dp, 40.dp),
-                            contentAlignment = Alignment.Center) {
+                if(date !="40") {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clickable {
+                            localDate.value =
+                                sdf.parse("${year}-${month}-${date}").toInstant().atZone(
+                                    ZoneId.systemDefault()).toLocalDate()
+                            globalDate.value = localDate.value.format(formatterGobal)
+                            change.value = 1
+                        }) {
+                        Text(text = date,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 2.dp),
+                            color = if (idx == 0 || idx == 6) {
+                                Color.Red
+                            } else {
+                                Color.Unspecified
+                            })
+                        Column {
+                            Box(modifier = Modifier.size(40.dp, 40.dp),
+                                contentAlignment = Alignment.Center) {
 
-                            if (db_Check(sdf.parse("$year-$month-$date").toInstant()
-                                    .atZone(ZoneId.systemDefault()).toLocalDate(), context)
-                            ) {
-                                Icon(painterResource(id = R.drawable.check), null, modifier = Modifier.size(12.dp))
+                                if (db_Check(sdf.parse("$year-$month-$date").toInstant()
+                                        .atZone(ZoneId.systemDefault()).toLocalDate(), context)
+                                ) {
+                                    Icon(painterResource(id = R.drawable.check),
+                                        null,
+                                        modifier = Modifier.size(12.dp))
+                                }
+
                             }
-
                         }
+
+                    }
+                }else{
+                    Card{
+                        Box(modifier = Modifier.size(40.dp, 40.dp))
                     }
 
                 }

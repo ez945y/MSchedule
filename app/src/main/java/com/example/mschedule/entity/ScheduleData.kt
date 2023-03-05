@@ -7,9 +7,15 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import java.text.SimpleDateFormat
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 val sdf = SimpleDateFormat("yyyy-MM-dd")
-val sdf_time = SimpleDateFormat("HH:mm")
+val sdfTime = SimpleDateFormat("HH:mm")
+val formatter = DateTimeFormatter.ofPattern("yy/MM/dd", Locale.TAIWAN)
+val formatterGobal = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.TAIWAN)
+val formatterTime = DateTimeFormatter.ofPattern("HH:mm", Locale.TAIWAN)
+val globalDate = mutableStateOf("")
 
 
 val tempItemList = mutableListOf(

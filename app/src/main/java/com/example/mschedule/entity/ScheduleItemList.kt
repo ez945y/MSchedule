@@ -21,6 +21,8 @@ data class ScheduleItem (
     var schedule:MutableState<String> =mutableStateOf(""),
     var tag:MutableState<String> =mutableStateOf(""),
     var note:MutableState<String> =mutableStateOf(""),
+    var alarm:MutableState<Int> =mutableStateOf(0),
+    var done:MutableState<Boolean> =mutableStateOf(false),
 )
 class ScheduleViewModel() : ViewModel() { //items: List<ScheduleItem>
 

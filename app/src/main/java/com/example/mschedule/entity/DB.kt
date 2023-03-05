@@ -15,7 +15,7 @@ object FeedReaderContract {
     // Table contents are grouped together in an anonymous object.
     object FeedEntry : BaseColumns {
         const val TABLE_NAME = "history"
-        const val COLUMN_NAME_text= "text"
+        const val COLUMN_NAME_text = "text"
         const val COLUMN_NAME_time = "time"
     }
 
@@ -32,12 +32,20 @@ object FeedReaderContract {
         const val COLUMN_NAME_schedule = "schedule"
         const val COLUMN_NAME_tag = "tag"
         const val COLUMN_NAME_note = "note"
+        const val COLUMN_NAME_alarm = "alarm"
+        const val COLUMN_NAME_done = "done"
     }
 
     object FeedEntry3 : BaseColumns {
         const val TABLE_NAME = "member"
         const val COLUMN_NAME_email = "email"
         const val COLUMN_NAME_password = "password"
+    }
+
+    object FeedEntry4 : BaseColumns {
+        const val TABLE_NAME = "calender"
+        const val COLUMN_NAME_name = "name"
+        const val COLUMN_NAME_member = "member"
     }
 
 }
@@ -58,17 +66,25 @@ private const val SQL_CREATE_ENTRIES2 =
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_startTime} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_endTime} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isAllDay} Bool," +
-            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat} Int," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_isRepeat} INT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_member} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule} TEXT," +
             "${FeedReaderContract.FeedEntry2.COLUMN_NAME_tag} TEXT," +
-            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_note} TEXT);"
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_note} TEXT," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_alarm} TEXT," +
+            "${FeedReaderContract.FeedEntry2.COLUMN_NAME_done} BOOL);"
 
 private const val SQL_CREATE_ENTRIES3 =
     "CREATE TABLE ${FeedReaderContract.FeedEntry3.TABLE_NAME} (" +
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
             "${FeedReaderContract.FeedEntry3.COLUMN_NAME_email} TEXT," +
             "${FeedReaderContract.FeedEntry3.COLUMN_NAME_password} TEXT);"
+
+private const val SQL_CREATE_ENTRIES4 =
+    "CREATE TABLE ${FeedReaderContract.FeedEntry4.TABLE_NAME} (" +
+            "${BaseColumns._ID} INTEGER PRIMARY KEY," +
+            "${FeedReaderContract.FeedEntry4.COLUMN_NAME_name} TEXT," +
+            "${FeedReaderContract.FeedEntry4.COLUMN_NAME_member} TEXT);"
 
 private const val SQL_DELETE_ENTRIES =
     "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry.TABLE_NAME}"
@@ -78,6 +94,8 @@ private const val SQL_DELETE_ENTRIES2 =
 
 private const val SQL_DELETE_ENTRIES3 =
     "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry3.TABLE_NAME}"
+private const val SQL_DELETE_ENTRIES4 =
+    "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry4.TABLE_NAME}"
 
 
 class FeedReaderDbHelper(context: Context) :
@@ -86,6 +104,7 @@ class FeedReaderDbHelper(context: Context) :
         db.execSQL(SQL_CREATE_ENTRIES)
         db.execSQL(SQL_CREATE_ENTRIES2)
         db.execSQL(SQL_CREATE_ENTRIES3)
+        db.execSQL(SQL_CREATE_ENTRIES4)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -94,6 +113,7 @@ class FeedReaderDbHelper(context: Context) :
         db.execSQL(SQL_DELETE_ENTRIES)
         db.execSQL(SQL_DELETE_ENTRIES2)
         db.execSQL(SQL_DELETE_ENTRIES3)
+        db.execSQL(SQL_DELETE_ENTRIES4)
         onCreate(db)
     }
 
@@ -125,20 +145,20 @@ fun db_Register(email: String, password: String, repeat: String, context: Contex
 fun db_Login(email: String, password: String, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.writableDatabase
-    val TAG ="RightFragment";
-    Log.d(TAG,"${email.length} ${password.length}")
+    val TAG = "RightFragment";
+    Log.d(TAG, "${email.length} ${password.length}")
     val c: Cursor =
-        rdb.rawQuery("SELECT member.password FROM member" , //WHERE member.email ='$email'
+        rdb.rawQuery("SELECT member.password FROM member", //WHERE member.email ='$email'
             null)
     c.moveToNext()
-    Log.d(TAG,c.count.toString())
-    if (c.count!=0 &&
-        c.getString(0) == password) {
+    Log.d(TAG, c.count.toString())
+    if (c.count != 0 &&
+        c.getString(0) == password
+    ) {
         return true
     }
     return false
 }
-
 
 
 fun db_Add(si: ScheduleItem, context: Context) {
@@ -156,8 +176,10 @@ fun db_Add(si: ScheduleItem, context: Context) {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule, si.schedule.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_tag, si.tag.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_note, si.note.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_alarm, si.alarm.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_done, si.done.value)
     }
-        val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
 }
 
 fun db_Replace(si: ScheduleItem, context: Context) {
@@ -175,11 +197,13 @@ fun db_Replace(si: ScheduleItem, context: Context) {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_schedule, si.schedule.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_tag, si.tag.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_note, si.note.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_alarm, si.alarm.value)
+        put(FeedReaderContract.FeedEntry2.COLUMN_NAME_done, si.done.value)
     }
     val c: Cursor =
         wdb.rawQuery("SELECT * FROM itemList WHERE itemList._id = '${si.id}'",
             null)
-    if(c.count>0){
+    if (c.count > 0) {
         wdb.execSQL("DELETE FROM itemList WHERE itemList._id = '${si.id}'")
     }
 
@@ -193,15 +217,24 @@ fun db_ReStart(context: Context) {
     db.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry.TABLE_NAME}")
     db.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry2.TABLE_NAME}")
     db.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry3.TABLE_NAME}")
+    db.execSQL("DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry4.TABLE_NAME}")
     db.execSQL(SQL_CREATE_ENTRIES)
     db.execSQL(SQL_CREATE_ENTRIES2)
     db.execSQL(SQL_CREATE_ENTRIES3)
+    db.execSQL(SQL_CREATE_ENTRIES4)
 }
 
 fun db_delete(id: Int, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val wdb = dbHelper.writableDatabase
     wdb.execSQL("DELETE FROM itemList WHERE itemList._ID = $id;")
+}
+
+fun db_deleteHistory(search: String, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val wdb = dbHelper.writableDatabase
+    wdb.execSQL("DELETE FROM history WHERE history.text = '$search'")
+    wdb.close()
 }
 
 fun db_Check(date: LocalDate, context: Context): Boolean {
@@ -212,7 +245,7 @@ fun db_Check(date: LocalDate, context: Context): Boolean {
             "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
                     "itemList.isRepeat = 1 OR " +
                     "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
-                    "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
+                    "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR " + // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
                     "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate))",
             null)
     if (c.count > 0) {
@@ -221,6 +254,7 @@ fun db_Check(date: LocalDate, context: Context): Boolean {
     c.close()
     return false
 }
+
 fun db_History(context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
@@ -234,7 +268,7 @@ fun db_History(context: Context) {
             moveToFirst()
             while (!isAfterLast) {
                 searchItemList.add(getString(1).orEmpty())
-                Log.d("ER",getString(2).orEmpty())
+                Log.d("ER", getString(2).orEmpty())
                 moveToNext()
             }
         }
@@ -243,7 +277,7 @@ fun db_History(context: Context) {
 
 }
 
-fun db_AddHistory(search:String, context: Context) {
+fun db_AddHistory(search: String, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val wdb = dbHelper.writableDatabase
     val values = ContentValues().apply {
@@ -253,7 +287,7 @@ fun db_AddHistory(search:String, context: Context) {
     val c: Cursor =
         wdb.rawQuery("SELECT * FROM history WHERE history.text = '$search'",
             null)
-    if(c.count>0){
+    if (c.count > 0) {
         wdb.execSQL("DELETE FROM history WHERE history.text = '$search'")
     }
 
@@ -261,16 +295,15 @@ fun db_AddHistory(search:String, context: Context) {
     c.close()
 }
 
-fun db_Search(search:String, context: Context) : MutableList<ScheduleItem>{
+fun db_Search(search: String, context: Context): MutableList<ScheduleItem> {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
-        val c: Cursor =
-        rdb.rawQuery("SELECT * FROM itemList WHERE (itemList.title LIKE '%$search%') OR (itemList.note LIKE '%$search%')",
+    val c: Cursor =
+        rdb.rawQuery("SELECT * FROM itemList WHERE (itemList.title LIKE '%$search%') OR (itemList.note LIKE '%$search%') OR (itemList.tag LIKE '%$search%')",
             null)
-    Log.d("dd" ,"SELECT * FROM itemList WHERE (itemList.title like '%$search%')")
 
     var res = mutableListOf<ScheduleItem>()
-    Log.d("FF","${c.count}")
+    Log.d("FF", "${c.count}")
     if (c.count != 0) {
         with(c) {
             moveToFirst()
@@ -281,9 +314,9 @@ fun db_Search(search:String, context: Context) : MutableList<ScheduleItem>{
                     ZoneId.systemDefault()).toLocalDate()
                 item.endDate.value = sdf.parse(getString(3)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
-                item.startTime.value = sdf_time.parse(getString(4)).toInstant().atZone(
+                item.startTime.value = sdfTime.parse(getString(4)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalTime()
-                item.endTime.value = sdf_time.parse(getString(5)).toInstant().atZone(
+                item.endTime.value = sdfTime.parse(getString(5)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalTime()
                 item.isAllDay.value = getInt(6) > 0
                 item.isRepeat.value = getInt(7)
@@ -291,6 +324,8 @@ fun db_Search(search:String, context: Context) : MutableList<ScheduleItem>{
                 item.schedule.value = getString(9).orEmpty()
                 item.tag.value = getString(10).orEmpty()
                 item.note.value = getString(11).orEmpty()
+                item.alarm.value = getInt(12)
+                item.done.value = getInt(13) > 0
                 res.add(item)
                 moveToNext()
             }
@@ -300,16 +335,18 @@ fun db_Search(search:String, context: Context) : MutableList<ScheduleItem>{
     return res
 
 }
+
 fun db_Select(date: LocalDate, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val rdb = dbHelper.readableDatabase
     val c: Cursor =
         rdb.rawQuery(
             "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
-                "itemList.isRepeat = 1 OR " +
-                "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
-                "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR "+ // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
-            "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate))",
+                    "itemList.isRepeat = 1 OR " +
+                    "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
+                    "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR " + // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
+                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate)) " +
+                    "ORDER BY itemList.startTime ASC",
             null)
     tempItemList.removeAll(tempItemList)
     if (c.count != 0) {
@@ -323,9 +360,9 @@ fun db_Select(date: LocalDate, context: Context) {
                     ZoneId.systemDefault()).toLocalDate()
                 item.endDate.value = sdf.parse(getString(3)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
-                item.startTime.value = sdf_time.parse(getString(4)).toInstant().atZone(
+                item.startTime.value = sdfTime.parse(getString(4)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalTime()
-                item.endTime.value = sdf_time.parse(getString(5)).toInstant().atZone(
+                item.endTime.value = sdfTime.parse(getString(5)).toInstant().atZone(
                     ZoneId.systemDefault()).toLocalTime()
                 item.isAllDay.value = getInt(6) > 0
                 item.isRepeat.value = getInt(7)
@@ -333,6 +370,8 @@ fun db_Select(date: LocalDate, context: Context) {
                 item.schedule.value = getString(9).orEmpty()
                 item.tag.value = getString(10).orEmpty()
                 item.note.value = getString(11).orEmpty()
+                item.alarm.value = getInt(12)
+                item.done.value = getInt(13) > 0
                 tempItemList.add(item)
             }
         }

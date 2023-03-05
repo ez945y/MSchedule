@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -20,8 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mschedule.R
-import com.example.mschedule.entity.ScheduleItem
-import com.example.mschedule.entity.db_Add
+import com.example.mschedule.entity.*
 import com.example.mschedule.ui.theme.MScheduleTheme
 import java.text.SimpleDateFormat
 import java.time.ZoneId
@@ -39,7 +39,7 @@ fun AddScreen(
     openDrawer: () -> Unit,
 ) {
     val sdf = SimpleDateFormat("yyyy-MM-dd")
-    val formatter = DateTimeFormatter.ofPattern("yy/MM/dd", Locale.TAIWAN)
+
     val context = LocalContext.current
     var date = remember {
         mutableStateOf(sdf.parse(dateId).toInstant().atZone(
@@ -81,7 +81,7 @@ fun AddScreen(
             Column {
                 Card(modifier = Modifier
                     .fillMaxWidth()
-                    .size(0.dp, 185.dp)
+                    .size(0.dp, 290.dp)
                     .padding(start = 16.dp, end = 16.dp, top = 20.dp)) {
                     Column {
                         Row {
@@ -97,64 +97,135 @@ fun AddScreen(
                             )
                         }
                         Row(modifier = Modifier.padding(top = 6.dp)) {
-                            Icon(Icons.Filled.Lock,
+                            Icon(painterResource(id = R.drawable.allday),
                                 modifier = Modifier
-                                    .clickable {}
-                                    .padding(start = 15.dp, top = 28.dp),
+                                    .padding(start = 15.dp, top = 30.dp)
+                                    .size(18.dp),
                                 contentDescription = null)
-                            Text(text = ScheduleItem.startDate.value.format(formatter),
+                            Text(text = "整天",
                                 textAlign = TextAlign.Center,
-                                fontSize = 20.sp,
                                 modifier = Modifier
-                                    .padding(top = 20.dp, start = 10.dp, end = 12.dp)
-                                    .clickable {
-                                        datePicker(true,
-                                            context,
-                                            ScheduleItem.startDate.value,
-                                            onDateSelect = {
-                                                ScheduleItem.startDate.value = it
-                                            })
-                                    }
+                                    .padding(top = 20.dp, start = 12.dp, end = 30.dp),
+                                fontSize = 20.sp
                             )
-                            Icon(Icons.Filled.ArrowForward,
+                            Switch(checked = ScheduleItem.isAllDay.value,
+                                onCheckedChange = { ScheduleItem.isAllDay.value = it },
+                                modifier = Modifier.padding(start = 150.dp, top = 15.dp))
+                        }
+                        Row {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(painterResource(id = R.drawable.date),
+                                    modifier = Modifier
+                                        .padding(start = 15.dp, top = 28.dp)
+                                        .size(18.dp),
+                                    contentDescription = null)
+                                Icon(painterResource(id = R.drawable.time),
+                                    modifier = Modifier
+                                        .padding(start = 15.dp, top = 40.dp)
+                                        .size(18.dp),
+                                    contentDescription = null)
+
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
-                                    .clickable {}
-                                    .padding(top = 28.dp),
-                                contentDescription = null)
-                            Text(text = ScheduleItem.endDate.value.format(formatter),
-                                textAlign = TextAlign.Center,
-                                fontSize = 20.sp,
+                                    .padding(start = 14.dp)) {
+                                Text(text = ScheduleItem.startDate.value.format(formatter),
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 20.sp,
+                                    modifier = Modifier
+                                        .padding(top = 20.dp)
+                                        .clickable {
+                                            datePicker(true,
+                                                context,
+                                                ScheduleItem.startDate.value,
+                                                onDateSelect = {
+                                                    ScheduleItem.startDate.value = it
+                                                })
+                                        }
+                                )
+                                if (!ScheduleItem.isAllDay.value) {
+                                    Text(text = ScheduleItem.startTime.value.format(formatterTime),
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 20.sp,
+                                        modifier = Modifier
+                                            .padding(top = 20.dp)
+                                            .clickable {
+                                                timePicker(true,
+                                                    context,
+                                                    ScheduleItem.startTime.value,
+                                                    onTimeSelect = {
+                                                        ScheduleItem.startTime.value = it
+                                                    })
+                                            }
+                                    )
+                                } else {
+                                    Text(text = "00:00",
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 20.sp,
+                                        modifier = Modifier
+                                            .padding(top = 20.dp))
+                                }
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
-                                    .padding(top = 20.dp, start = 12.dp)
-                                    .clickable {
-                                        datePicker(true,
-                                            context,
-                                            ScheduleItem.endDate.value,
-                                            onDateSelect = {
-                                                ScheduleItem.endDate.value = it
-                                            })
-                                    }
-                            )
+                                    .padding(start = 14.dp)) {
+
+                                Icon(Icons.Filled.ArrowForward,
+                                    modifier = Modifier
+                                        .padding(top = 28.dp),
+                                    contentDescription = null)
+
+                                Icon(Icons.Filled.ArrowForward,
+                                    modifier = Modifier
+                                        .padding(top = 28.dp),
+                                    contentDescription = null)
+
+
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = ScheduleItem.endDate.value.format(formatter),
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 20.sp,
+                                    modifier = Modifier
+                                        .padding(top = 20.dp, start = 12.dp)
+                                        .clickable {
+                                            datePicker(true,
+                                                context,
+                                                ScheduleItem.endDate.value,
+                                                onDateSelect = {
+                                                    ScheduleItem.endDate.value = it
+                                                })
+                                        }
+                                )
+                                if (!ScheduleItem.isAllDay.value) {
+                                    Text(text = ScheduleItem.endTime.value.format(formatterTime),
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 20.sp,
+                                        modifier = Modifier
+                                            .padding(top = 20.dp, start = 10.dp, end = 12.dp)
+                                            .clickable {
+                                                timePicker(true,
+                                                    context,
+                                                    ScheduleItem.endTime.value,
+                                                    onTimeSelect = {
+                                                        ScheduleItem.endTime.value = it
+                                                    }
+                                                )
+                                            }
+                                    )
+                                } else {
+                                    Text(text = "23:59",
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 20.sp,
+                                        modifier = Modifier
+                                            .padding(top = 20.dp))
+                                }
+                            }
 
                         }
-                        Divider(color = MaterialTheme.colorScheme.secondary,
-                            thickness = 1.dp,
-                            modifier = Modifier
-                                .padding(horizontal = 26.dp)
-                                .padding(start = 20.dp, top = 6.dp))
                     }
                 }
-                Row(modifier = Modifier.padding(top = 6.dp)) {
-                    Text(text = "整天",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(top = 20.dp, start = 30.dp, end = 30.dp),
-                        fontSize = 20.sp
-                    )
-                    Switch(checked = ScheduleItem.isAllDay.value,
-                        onCheckedChange = { ScheduleItem.isAllDay.value = it },
-                        modifier = Modifier.padding(start = 180.dp, top = 15.dp))
-                }
+
                 Row {
                     Text(text = "重複",
                         textAlign = TextAlign.Center,
@@ -176,7 +247,9 @@ fun AddScreen(
                             Icon(icons[idx],
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.inverseSurface,
-                                modifier = Modifier.padding(start = 16.dp, top = 16.dp).size(18.dp))
+                                modifier = Modifier
+                                    .padding(start = 16.dp, top = 16.dp)
+                                    .size(18.dp))
                             Spacer(modifier = Modifier.padding(4.dp))
                             TextField(
                                 value = info.value,
@@ -188,11 +261,17 @@ fun AddScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.size(10.dp))
                 Button(onClick = {
+                    if (ScheduleItem.isAllDay.value) {
+                        ScheduleItem.startTime.value = sdfTime.parse("00:00").toInstant().atZone(
+                            ZoneId.systemDefault()).toLocalTime()
+                        ScheduleItem.endTime.value = sdfTime.parse("23:59").toInstant().atZone(
+                            ZoneId.systemDefault()).toLocalTime()
+                    }
                     db_Add(ScheduleItem, context)
                     navController.popBackStack()
-                }, modifier = Modifier.padding(start = 150.dp)) {
+                }, modifier = Modifier.padding(start = 140.dp)) {
                     Text(text = "完成新增")
                 }
             }

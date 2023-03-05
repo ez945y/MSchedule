@@ -128,7 +128,8 @@ fun DayScreen(
                     }
                     itemsIndexed(scheduleList) { idx, schedule ->
                         ScheduleItemDisplay(schedule, navController, context, idx
-                        ) { scheduleVM.deleteSchedule(it) }
+                        )
+                        //{ scheduleVM.deleteSchedule(it) }
                     }
                 }
 
@@ -146,54 +147,98 @@ fun ScheduleItemDisplay(
     navController: NavController,
     context: Context,
     idx: Int,
-    scheduleVM: (Int) -> Unit,
+//    scheduleVM: (Int) -> Unit,
 ) {
-    Row(modifier = Modifier
-        .padding(top = 8.dp)) {
-        Text(
-            text = "${schedule.startTime.value}",
-            modifier = Modifier.padding(start = 18.dp, top = 7.dp)
-        )
+    var showAlertDialog = remember { mutableStateOf(false) }
+    Box {
+        Row(modifier = Modifier
+            .padding(top = 8.dp)) {
+            Text(
+                text = "${schedule.startTime.value}",
+                modifier = Modifier.padding(start = 18.dp, top = 7.dp)
+            )
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            Row(
+            Card(
                 modifier = Modifier
-                    .padding(vertical = 6.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
             ) {
-                Text(
-                    text = schedule.title.value,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(start = 20.dp),
-                )
-                Row {
-                    Icon(Icons.Filled.Delete,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(end = 20.dp)
-                            .size(24.dp)
-                            .clickable {
-                                db_delete(id = schedule.id, context = context)
-                                scheduleVM(idx)
-                            })
-                    Icon(Icons.Filled.Edit,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(end = 20.dp)
-                            .size(24.dp)
-                            .clickable { navController.navigate("Edit/$idx") })
-                    Icon(
-                        Icons.Filled.Done,null,modifier = Modifier
-                            .padding(end = 20.dp))
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = 6.dp)
+                        .fillMaxWidth()
+                        .clickable { navController.navigate("Edit/$idx") },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = schedule.title.value,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(start = 20.dp),
+                    )
+                    Row {
+                        Icon(Icons.Filled.Delete,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(end = 20.dp)
+                                .size(27.dp)
+                                .clickable {
+                                    showAlertDialog.value = true
+                                    //scheduleVM(idx)
+                                })
+                        Icon(painterResource(id = R.drawable.edit),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(end = 20.dp)
+                                .size(24.dp)
+                                .clickable { navController.navigate("Edit/$idx") })
+                        Icon(
+                            painterResource(id = R.drawable.done), null, modifier = Modifier
+                                .padding(end = 20.dp)
+                                .size(24.dp)
+                                .clickable {
+                                    schedule.done.value = !schedule.done.value
+                                    db_Replace(schedule, context)
+                                })
+                    }
                 }
-            }
 
+            }
+        }
+        if(schedule.done.value) {
+            Divider(thickness = 2.dp, modifier = Modifier.padding(top = 28.dp,start = 10.dp,end=10.dp))
+        }
+        if (showAlertDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    showAlertDialog.value = false;
+                },
+                title = {
+                    Text("確認")
+                },
+                text = {
+                    Text("請問是否要刪除行程")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            db_delete(id = schedule.id, context = context)
+                            showAlertDialog.value = false
+                        },
+                        modifier = Modifier.padding()
+                    )
+                    {
+                        Text(text = "確認")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showAlertDialog.value = false },
+                        modifier = Modifier.padding(end = 50.dp))
+                    {
+                        Text(text = "取消")
+                    }
+                }
+            )
         }
     }
 }

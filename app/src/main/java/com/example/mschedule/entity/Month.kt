@@ -33,7 +33,7 @@ class Months() : ArrayList<ArrayList<String>>() {
         val pre = ms[moon - 1]!! - a + 1
 
         for (i in pre..ms[moon - 1]!!) {
-            sw.add(i.toString())
+            sw.add("40")
         }
         for (i in 1..(7 - a)) {
             sw.add(i.toString())
@@ -52,7 +52,7 @@ class Months() : ArrayList<ArrayList<String>>() {
 
         if (sw.size != 0) {
             for (i in 1..(7 - sw.size)) {
-                sw.add(i.toString())
+                sw.add("40")
             }
             sm.add(sw)
         }

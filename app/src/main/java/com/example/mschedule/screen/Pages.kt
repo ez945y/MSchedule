@@ -47,7 +47,7 @@ fun Account(openDrawer: () -> Unit) {
             val textState = remember { mutableStateOf(TextFieldValue("")) }
             Column {
                 SearchScreen(textState) { showAlertDialog = false }
-                ItemList(state = textState,LocalContext.current)
+                ItemList(state = textState,LocalContext.current){}
             }
         } else {
             MTopBar( { showAlertDialog = true }, onButtonClicked = {
