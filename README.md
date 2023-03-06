@@ -16,3 +16,5 @@ https://www.gushiciku.cn/pl/abC0/zh-tw
 https://blog.csdn.net/sinat_38184748/article/details/119345811
 
 https://developer.android.com/jetpack/compose/gestures?hl=zh-tw#multitouch
+
+https://github.com/rawhasan/compose-exercise-notifications/blob/master/app/src/main/java/com/example/notifications/MainActivity.kt
