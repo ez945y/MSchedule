@@ -7,11 +7,11 @@ plugins {
 }
 apply plugin: 'com.google.gms.google-services'
 android {
-    namespace 'com.example.mschedule'
+    namespace 'neat.arrange.mschedule'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.mschedule"
+        applicationId "neat.arrange.mschedule"
         minSdk 26
         targetSdk 33
         versionCode 1

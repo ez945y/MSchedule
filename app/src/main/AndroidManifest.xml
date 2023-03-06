@@ -14,7 +14,7 @@
         android:theme="@style/Theme.MSchedule"
         tools:targetApi="31">
         <activity
-            android:name="com.example.mschedule.MainActivity"
+            android:name="neat.arrange.mschedule.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MSchedule">
@@ -28,6 +28,12 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+        <receiver android:name=".entity.AlarmReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="activity_app" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
