@@ -45,7 +45,7 @@ object FeedReaderContract {
     object FeedEntry4 : BaseColumns {
         const val TABLE_NAME = "calender"
         const val COLUMN_NAME_name = "name"
-        const val COLUMN_NAME_member = "member"
+        const val COLUMN_NAME_color = "color"
     }
 
 }
@@ -84,7 +84,7 @@ private const val SQL_CREATE_ENTRIES4 =
     "CREATE TABLE ${FeedReaderContract.FeedEntry4.TABLE_NAME} (" +
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
             "${FeedReaderContract.FeedEntry4.COLUMN_NAME_name} TEXT," +
-            "${FeedReaderContract.FeedEntry4.COLUMN_NAME_member} TEXT);"
+            "${FeedReaderContract.FeedEntry4.COLUMN_NAME_color} TEXT);"
 
 private const val SQL_DELETE_ENTRIES =
     "DROP TABLE IF EXISTS ${FeedReaderContract.FeedEntry.TABLE_NAME}"
@@ -126,6 +126,16 @@ class FeedReaderDbHelper(context: Context) :
         const val DATABASE_VERSION = 1
         const val DATABASE_NAME = "Schedule.db"
     }
+}
+
+fun dbAddCalender(name:String,color:String, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val wdb = dbHelper.writableDatabase
+    val values = ContentValues().apply {
+        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_name, name)
+        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_color, color)
+    }
+    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry4.TABLE_NAME, null, values)
 }
 
 fun dbRegister(email: String, password: String, repeat: String, context: Context): Boolean {

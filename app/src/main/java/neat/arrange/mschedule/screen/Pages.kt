@@ -22,7 +22,6 @@ fun Help(
 ) {
     val context = LocalContext.current
     val channelId = "MyTestChannel"
-    //val notificationId = 0
     LaunchedEffect(Unit) {
         createNotificationChannel(channelId, context)
     }
@@ -41,17 +40,10 @@ fun Help(
 
         // simple notification button with tap action
         Button(onClick = {
-            cal.add(Calendar.MONTH, 1)
+            //cal.add(Calendar.MONTH, 1)
             cal.add(Calendar.MINUTE, 1) //加一分鐘
             cal[Calendar.SECOND] = 0 //設定秒數為0
             add_alarm(context, cal)
-//            showSimpleNotificationWithTapAction(
-//                context,
-//                channelId,
-//                notificationId,
-//                "Simple notification + Tap action",
-//                "This simple notification will open an activity on tap."
-//            )
         }, modifier = Modifier.padding(top = 16.dp)) {
             Text(text = "Simple Notification + Tap Action")
         }

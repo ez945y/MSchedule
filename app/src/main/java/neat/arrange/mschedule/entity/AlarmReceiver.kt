@@ -9,6 +9,8 @@ import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import neat.arrange.mschedule.MainActivity
@@ -21,14 +23,25 @@ class AlarmReceiver : BroadcastReceiver() {
     private var notification: Notification? = null
 
     override fun onReceive(context: Context, intent: Intent) {
+        val channelId = "MyTestChannel"
+        val notificationId = 0
+        createNotificationChannel(channelId, context)
         val bData = intent.extras
         if (bData!!["title"] == "activity_app") {
             Log.d("我成功了","Yes")
-            val notifyIntent = Intent(context, MainActivity::class.java)
-            val pendingIntent = PendingIntent.getActivity(context, 0, notifyIntent, 0)
+            //val notifyIntent = Intent(context, MainActivity::class.java)
+            //val pendingIntent = PendingIntent.getActivity(context, 0, notifyIntent, 0)
 
             //        執行通知
-            broadcastNotify(context, pendingIntent)
+            //broadcastNotify(context, pendingIntent)
+
+            showSimpleNotificationWithTapAction(
+                context,
+                channelId,
+                notificationId,
+                "Simple notification + Tap action",
+                "This simple notification will open an activity on tap."
+            )
         }
 
     }

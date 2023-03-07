@@ -93,6 +93,7 @@ fun ItemList(state: MutableState<TextFieldValue>, context: Context,navController
                         modifier = Modifier
                             .clickable(onClick = {
                                 dbAddhistory(searchedText, context)
+                                tempItemList = filteredItems
                                 navController.navigate("Edit/$idx")
                             })
                             .height(57.dp)

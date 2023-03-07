@@ -3,6 +3,8 @@ package neat.arrange.mschedule.screen
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
@@ -15,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import neat.arrange.mschedule.R
+import neat.arrange.mschedule.entity.calenderItemList
 import neat.arrange.mschedule.entity.dbReStart
 
 sealed class DrawerScreens(val title: String, val route: String) {
@@ -59,50 +62,27 @@ fun Drawer(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.background,
                     modifier = Modifier.padding(start = 10.dp))
-                Text("清空", modifier = Modifier.padding(start = 180.dp).clickable {showAlertDialog.value = true})
+                Text("新增", modifier = Modifier.padding(start = 120.dp).clickable {})
+                Text("清空", modifier = Modifier.padding(start = 10.dp).clickable {showAlertDialog.value = true})
             }
 
             Card(modifier = Modifier.padding(top = 20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)) {
-                Row(modifier = Modifier.padding(10.dp)) {
-                    Card(modifier = Modifier
-                        .padding(5.dp)
-                        .clickable {},
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary)) {
-                        Text(
-                            "工作",
-                            color = MaterialTheme.colorScheme.background,
-                            modifier = Modifier
-                                .size(88.dp)
-                                .padding(top = 30.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Card(modifier = Modifier
-                        .padding(5.dp)
-                        .clickable {},
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.inversePrimary)) {
-                        Text(
-                            "學校",
-                            color = MaterialTheme.colorScheme.background,
-                            modifier = Modifier
-                                .size(88.dp)
-                                .padding(top = 30.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                    Card(modifier = Modifier
-                        .padding(5.dp)
-                        .clickable {},
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.inverseOnSurface)) {
-                        Text(
-                            "女友",
-                            color = MaterialTheme.colorScheme.inverseSurface,
-                            modifier = Modifier
-                                .size(88.dp)
-                                .padding(top = 30.dp),
-                            textAlign = TextAlign.Center,
-                        )
+                LazyRow(modifier = Modifier.padding(10.dp).padding(end=5.dp)) {
+                    items(calenderItemList){ calender ->
+                        Card(modifier = Modifier
+                            .padding(5.dp).padding(end=6.dp)
+                            .clickable {},
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary)) {
+                            Text(
+                                calender.name.value,
+                                color = MaterialTheme.colorScheme.background,
+                                modifier = Modifier
+                                    .size(88.dp)
+                                    .padding(top = 30.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }

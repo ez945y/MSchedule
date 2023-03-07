@@ -382,3 +382,42 @@ fun DropDown(
         }
     }
 }
+
+
+@Composable
+fun DropDownNotification(
+    data: MutableState<Int>,
+    modifier: Modifier,
+) {
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+    val items = listOf("永不", "每天", "每周", "每月", "每年")
+    val value = listOf(0, 1, 2, 3, 4)
+    val text = remember { mutableStateOf("${items[data.value]}") }
+
+    Box(
+        modifier = modifier
+    ) {
+        Button(
+            onClick = {
+                expanded.value = true
+            }, modifier = Modifier.padding(top=10.dp).size(70.dp,30.dp)
+        ) {
+            Text(text = text.value,fontSize = 8.sp)
+        }
+
+        DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
+            items.forEachIndexed { idx, s ->
+                DropdownMenuItem(
+                    text = { Text(text = s) },
+                    onClick = {
+                        text.value = s
+                        data.value = value[idx]
+                        expanded.value = false
+                    }
+                )
+            }
+        }
+    }
+}

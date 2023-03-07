@@ -14,7 +14,7 @@ val formatterTime: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Loca
 val globalDate = mutableStateOf("")
 
 
-val tempItemList = mutableListOf(
+var tempItemList = mutableListOf(
     //TODO extract data
     ScheduleItem(
         id = 3,
