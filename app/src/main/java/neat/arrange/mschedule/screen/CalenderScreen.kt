@@ -3,7 +3,7 @@ package neat.arrange.mschedule.screen
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +43,6 @@ fun calenderScreen(
     context: Context,
     localDate: MutableState<LocalDate>,
     month: ArrayList<ArrayList<String>>,
-    state: ScrollableState,
     change: MutableState<Int>,
 ) {
     val formatterMonth = DateTimeFormatter.ofPattern("MM", Locale.TAIWAN)
@@ -50,6 +51,41 @@ fun calenderScreen(
     yearNum.value = localDate.value.format(formatterYear).toInt()
     monthNum.value = localDate.value.format(formatterMonth).toInt()
     dayNum.value = localDate.value.format(formatterDay).toInt()
+    val horizontalCount = remember {
+        mutableStateOf(0.0)
+    }
+    val stateMonth = rememberScrollableState {
+        horizontalCount.value += it
+        if (horizontalCount.value < -400.0) {
+            if(monthNum.value == 12){
+                yearNum.value += 1
+                monthNum.value = 1
+            }else{
+                monthNum.value += 1
+            }
+            localDate.value =
+                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+            globalDate.value = localDate.value.format(formatterGobal)
+            horizontalCount.value = 0.0
+
+        }
+        if (horizontalCount.value > 400.0) {
+            if(monthNum.value == 1){
+                yearNum.value -= 1
+                monthNum.value = 12
+            }else{
+                monthNum.value -= 1
+            }
+            localDate.value =
+                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
+                    ZoneId.systemDefault()).toLocalDate()
+            globalDate.value = localDate.value.format(formatterGobal)
+            horizontalCount.value = 0.0
+
+        }
+        it
+    }
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -59,7 +95,13 @@ fun calenderScreen(
             .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp)
             .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Icon(Icons.Filled.ArrowBack,
-                modifier = Modifier.clickable { monthNum.value -= 1
+                modifier = Modifier.clickable {
+                    if(monthNum.value == 1){
+                        yearNum.value -= 1
+                        monthNum.value = 12
+                    }else{
+                        monthNum.value -= 1
+                    }
                     localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
                         ZoneId.systemDefault()).toLocalDate()
                     globalDate.value = localDate.value.format(formatterGobal)},
@@ -74,7 +116,13 @@ fun calenderScreen(
                         })
                     })
             Icon(Icons.Filled.ArrowForward,
-                modifier = Modifier.clickable { monthNum.value += 1
+                modifier = Modifier.clickable {
+                    if(monthNum.value == 12){
+                    yearNum.value += 1
+                    monthNum.value = 1
+                }else{
+                    monthNum.value += 1
+                }
                     localDate.value = sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
                         ZoneId.systemDefault()).toLocalDate()
                     globalDate.value = localDate.value.format(formatterGobal)},
@@ -88,7 +136,7 @@ fun calenderScreen(
         LazyColumn(modifier = Modifier
             .padding(horizontal = 8.dp)
             .scrollable(
-                state = state, orientation = Orientation.Horizontal,
+                state = stateMonth, orientation = Orientation.Horizontal,
             )) {
             items(month) { m ->
                 Divider(color = MaterialTheme.colorScheme.secondary,

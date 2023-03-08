@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import neat.arrange.mschedule.entity.ScheduleViewModel
 import neat.arrange.mschedule.entity.dbSelect
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -52,6 +53,19 @@ fun simpleScreen(
     val scheduleVM = ScheduleViewModel()
     val tempList = scheduleVM.scheduleList
     val index = remember { mutableStateOf(0) }
+    var flag2 = remember { mutableStateOf(true) }
+    if (flag2.value) {
+        while (
+            tempList.isNotEmpty()
+            && tempList[0].endDate.value >= LocalDate.now()
+            && tempList[0].startDate.value <= LocalDate.now()
+            && tempList.size-1 > index.value
+            && tempList[index.value].startTime.value < LocalTime.now()
+        ) {
+            index.value += 1
+        }
+        flag2.value = false
+    }
     Card(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()
@@ -136,7 +150,8 @@ fun simpleScreen(
                     }
                     Card(modifier = Modifier
                         .padding(top = 70.dp, start = 30.dp, end = 30.dp)
-                        .fillMaxWidth().clickable { navController.navigate("Edit/${index.value}")  },
+                        .fillMaxWidth()
+                        .clickable { navController.navigate("Edit/${index.value}") },
                         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 20.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -152,10 +167,10 @@ fun simpleScreen(
                                 thickness = 1.dp,
                                 modifier = Modifier
                                     .padding(horizontal = 50.dp))
-                            if (tempList[index.value].note.value !=""){
+                            if (tempList[index.value].note.value != "") {
                                 Text("${tempList[index.value].note.value}", modifier = Modifier
                                     .padding(top = 25.dp, bottom = 25.dp), fontSize = 24.sp)
-                            }else{
+                            } else {
                                 Text("尚無備註", modifier = Modifier
                                     .padding(top = 25.dp, bottom = 25.dp), fontSize = 24.sp)
                             }

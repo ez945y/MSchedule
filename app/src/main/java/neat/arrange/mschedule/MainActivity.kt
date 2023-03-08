@@ -86,6 +86,12 @@ class MainActivity : ComponentActivity() {
                                         },
                                     )
                             }
+                            composable(route =DrawerScreens.EditCalender.route+"/{calenderID}") { backStackEntry ->
+                                EditCalenderScreen(
+                                    id= backStackEntry.arguments?.getString("calenderID").orEmpty(),
+                                    navController=navController
+                                )
+                            }
                             composable(DrawerScreens.Account.route) {
                                 LoginScreen(registerClick = {navController.navigate("Register")})
                             }
@@ -103,6 +109,9 @@ class MainActivity : ComponentActivity() {
                                     openDrawer = {
                                         openDrawer()
                                     })
+                            }
+                            composable(route = DrawerScreens.AddCalender.route) {
+                                AddCalenderScreen(navController = navController)
                             }
                             /*
                             composable(DrawerScreens.Day.route+"/{dateID}") { backStackEntry ->

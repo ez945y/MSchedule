@@ -18,10 +18,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import neat.arrange.mschedule.R
 import neat.arrange.mschedule.entity.*
+import java.time.ZoneId
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(calenderItem: CalenderItem = CalenderItem(66), navController: NavController) {
+fun EditCalenderScreen(id: String = "1", navController: NavController) {
     val context = LocalContext.current
+    val calenderItem = calenderItemList[id.toInt()]
+    val showAlertDialog = remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
         ElevatedCard(modifier = Modifier
@@ -55,51 +59,52 @@ fun AddScreen(calenderItem: CalenderItem = CalenderItem(66), navController: NavC
                         .padding(top = 25.dp, start = 10.dp),
                     fontSize = 16.sp
                 )
-                DropDownColor(calenderItem.color, Modifier.padding(start = 10.dp, top = 15.dp))
+                DropDownColor(calenderItem.color, Modifier.padding(start = 40.dp, top = 15.dp))
             }
-            Spacer(modifier = Modifier.size(10.dp))
-            Button(onClick = {
-                dbAddCalender(calenderItem.name.value, calenderItem.color.value, context)
-                navController.popBackStack()
-            }, modifier = Modifier.padding(start = 140.dp)) {
-                Text(text = "完成新增")
+
+            Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.padding(top=20.dp, bottom = 20.dp)) {
+                Button(onClick = {
+                    showAlertDialog.value = true
+                }, modifier = Modifier.padding(start = 15.dp)) {
+                    Text(text = "刪除行事曆")
+                }
+                Button(onClick = {
+                    dbReplaceCalender(calenderItem, context)
+                    navController.popBackStack()
+                }, modifier = Modifier.padding(start = 15.dp)) {
+                    Text(text = "完成編輯")
+                }
             }
-        }
-    }
-}
-
-
-@Composable
-fun DropDownColor(
-    colorCode: MutableState<String>,
-    modifier: Modifier,
-) {
-    val colorItems = listOf("0xFFDAE2FF", "0xFFDAE2FF", "0xFFDAE2FF", "0xFFDAE2FF", "0xFFDAE2FF")
-    val colorNameItems = listOf("藍色", "紅色", "綠色", "紫色", "橘色")
-    val colorName = remember { mutableStateOf("${colorNameItems[0]}") }
-    val expanded = remember { mutableStateOf(false) }
-
-    Box(
-        modifier = modifier
-    ) {
-        Button(
-            onClick = {
-                expanded.value = true
-            }, modifier = Modifier
-                .padding(top = 10.dp)
-                .size(70.dp, 30.dp)
-        ) {
-            Text(text = colorName.value, fontSize = 8.sp)
-        }
-
-        DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
-            colorItems.forEachIndexed { idx, s ->
-                DropdownMenuItem(
-                    text = { Text(text = s) },
-                    onClick = {
-                        colorName.value = s
-                        colorCode.value = colorItems[idx]
-                        expanded.value = false
+            if (showAlertDialog.value) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showAlertDialog.value = false
+                    },
+                    title = {
+                        Text("確認")
+                    },
+                    text = {
+                        Text("請問是否要刪除行事曆")
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showAlertDialog.value = false
+                                dbDeleteCalender(id = calenderItem.id, context = context)
+                                navController.popBackStack()
+                            },
+                            modifier = Modifier.padding()
+                        )
+                        {
+                            Text(text = "確認")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showAlertDialog.value = false },
+                            modifier = Modifier.padding(end = 50.dp))
+                        {
+                            Text(text = "取消")
+                        }
                     }
                 )
             }

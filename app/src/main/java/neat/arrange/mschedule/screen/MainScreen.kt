@@ -66,32 +66,20 @@ fun MainScreen(
     val horizontalCount = remember {
         mutableStateOf(0.0)
     }
-    val stateMonth = rememberScrollableState {
-        horizontalCount.value += it
-        if (horizontalCount.value < -400.0 && monthNum.value < 12) {
-            monthNum.value += 1
-            localDate.value =
-                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                    ZoneId.systemDefault()).toLocalDate()
-            globalDate.value = localDate.value.format(formatterGobal)
-            horizontalCount.value = 0.0
-
-        }
-        if (horizontalCount.value > 400.0 && monthNum.value > 1) {
-            monthNum.value -= 1
-            localDate.value =
-                sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
-                    ZoneId.systemDefault()).toLocalDate()
-            globalDate.value = localDate.value.format(formatterGobal)
-            horizontalCount.value = 0.0
-
-        }
-        it
-    }
     val stateDate = rememberScrollableState {
         horizontalCount.value += it
-        if (horizontalCount.value < -400.0 && dayNum.value < 12) {
-            dayNum.value += 1
+        if (horizontalCount.value < -400.0) {
+            if(dayNum.value == ms[monthNum.value]){
+                if(monthNum.value == 12){
+                    yearNum.value += 1
+                    monthNum.value = 1
+                }else{
+                    monthNum.value += 1
+                }
+                dayNum.value = 1
+            }else{
+                dayNum.value += 1
+            }
             localDate.value =
                 sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
@@ -100,8 +88,18 @@ fun MainScreen(
             dbSelect(localDate.value, context)
 
         }
-        if (horizontalCount.value > 400.0 && dayNum.value > 1) {
-            dayNum.value -= 1
+        if (horizontalCount.value > 400.0) {
+            if(dayNum.value == 1){
+                if(monthNum.value == 1){
+                    yearNum.value -= 1
+                    monthNum.value = 12
+                }else{
+                    monthNum.value -= 1
+                }
+                dayNum.value = ms[monthNum.value]!!
+            }else{
+                dayNum.value -= 1
+            }
             localDate.value =
                 sdf.parse("${yearNum.value}-${monthNum.value}-${dayNum.value}").toInstant().atZone(
                     ZoneId.systemDefault()).toLocalDate()
@@ -157,7 +155,6 @@ fun MainScreen(
                         dayNum = dayNum,
                         context = context,
                         month = month,
-                        state = stateMonth,
                         change = change,
                     )
                 }

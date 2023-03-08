@@ -2,20 +2,22 @@ package neat.arrange.mschedule.entity
 
 import androidx.compose.runtime.mutableStateOf
 
-class Months : ArrayList<ArrayList<String>>() {
-    private val ms: Map<Int, Int> = mapOf(0 to 35, 1 to 31,
-        2 to 28,
-        3 to 31,
-        4 to 30,
-        5 to 31,
-        6 to 30,
-        7 to 31,
-        8 to 31,
-        9 to 30,
-        10 to 31,
-        11 to 30,
-        12 to 31)
+val ms: Map<Int, Int> = mapOf(
+    0 to 35,
+    1 to 31,
+    2 to 28,
+    3 to 31,
+    4 to 30,
+    5 to 31,
+    6 to 30,
+    7 to 31,
+    8 to 31,
+    9 to 30,
+    10 to 31,
+    11 to 30,
+    12 to 31)
 
+class Months : ArrayList<ArrayList<String>>() {
     private fun addMoon(moon: Int): Int {
         var res = 0
 

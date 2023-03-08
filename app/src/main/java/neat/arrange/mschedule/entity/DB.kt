@@ -128,36 +128,30 @@ class FeedReaderDbHelper(context: Context) :
     }
 }
 
-fun dbAddCalender(name:String,color:String, context: Context) {
-    val dbHelper = FeedReaderDbHelper(context)
-    val wdb = dbHelper.writableDatabase
-    val values = ContentValues().apply {
-        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_name, name)
-        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_color, color)
-    }
-    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry4.TABLE_NAME, null, values)
-}
+
 
 fun dbRegister(email: String, password: String, repeat: String, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
-    val wdb = dbHelper.writableDatabase
+    val db = dbHelper.writableDatabase
     if (password == repeat) {
         val values = ContentValues().apply {
             put(FeedReaderContract.FeedEntry3.COLUMN_NAME_email, email)
             put(FeedReaderContract.FeedEntry3.COLUMN_NAME_password, password)
         }
-        val newRowId = wdb?.insert(FeedReaderContract.FeedEntry3.TABLE_NAME, null, values)
+        val newRowId = db?.insert(FeedReaderContract.FeedEntry3.TABLE_NAME, null, values)
+        db.close()
         return true
     }
+    db.close()
     return false
 }
 
 fun dbLogin(email: String, password: String, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.writableDatabase
+    val db = dbHelper.writableDatabase
     Log.d("long", "${email.length} ${password.length}")
     val c: Cursor =
-        rdb.rawQuery("SELECT member.password FROM member", //WHERE member.email ='$email'
+        db.rawQuery("SELECT member.password FROM member", //WHERE member.email ='$email'
             null)
     c.moveToNext()
     Log.d("count", c.count.toString())
@@ -165,16 +159,18 @@ fun dbLogin(email: String, password: String, context: Context): Boolean {
         c.getString(0) == password
     ) {
         c.close()
+        db.close()
         return true
     }
     c.close()
+    db.close()
     return false
 }
 
 
 fun dbAdd(si: ScheduleItem, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val wdb = dbHelper.writableDatabase
+    val db = dbHelper.writableDatabase
     val values = ContentValues().apply {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startDate, si.startDate.value.toString())
@@ -190,12 +186,13 @@ fun dbAdd(si: ScheduleItem, context: Context) {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_alarm, si.alarm.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_done, si.done.value)
     }
-    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+    val newRowId = db?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+    db.close()
 }
 
 fun dbReplace(si: ScheduleItem, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val wdb = dbHelper.writableDatabase
+    val db = dbHelper.writableDatabase
     val values = ContentValues().apply {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_title, si.title.value)
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_startDate, si.startDate.value.toString())
@@ -212,14 +209,33 @@ fun dbReplace(si: ScheduleItem, context: Context) {
         put(FeedReaderContract.FeedEntry2.COLUMN_NAME_done, si.done.value)
     }
     val c: Cursor =
-        wdb.rawQuery("SELECT * FROM itemList WHERE itemList._id = '${si.id}'",
+        db.rawQuery("SELECT * FROM itemList WHERE itemList._id = '${si.id}'",
             null)
     if (c.count > 0) {
-        wdb.execSQL("DELETE FROM itemList WHERE itemList._id = '${si.id}'")
+        db.execSQL("DELETE FROM itemList WHERE itemList._id = '${si.id}'")
     }
 
-    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
+    val newRowId = db?.insert(FeedReaderContract.FeedEntry2.TABLE_NAME, null, values)
     c.close()
+    db.close()
+}
+fun dbReplaceCalender(cal: CalenderItem, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val db = dbHelper.writableDatabase
+    val values = ContentValues().apply {
+        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_name, cal.name.value)
+        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_color, cal.color.value)
+    }
+    val c: Cursor =
+        db.rawQuery("SELECT * FROM calender WHERE calender._id = '${cal.id}'",
+            null)
+    if (c.count > 0) {
+        db.execSQL("DELETE FROM calender WHERE calender._id = '${cal.id}'")
+    }
+
+    val newRowId = db?.insert(FeedReaderContract.FeedEntry4.TABLE_NAME, null, values)
+    c.close()
+    db.close()
 }
 
 fun dbReStart(context: Context) {
@@ -233,26 +249,35 @@ fun dbReStart(context: Context) {
     db.execSQL(SQL_CREATE_ENTRIES2)
     db.execSQL(SQL_CREATE_ENTRIES3)
     db.execSQL(SQL_CREATE_ENTRIES4)
+    db.close()
 }
 
 fun dbDelete(id: Int, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val wdb = dbHelper.writableDatabase
-    wdb.execSQL("DELETE FROM itemList WHERE itemList._ID = $id;")
+    val db = dbHelper.writableDatabase
+    db.execSQL("DELETE FROM itemList WHERE itemList._ID = $id;")
+    db.close()
+}
+
+fun dbDeleteCalender(id: Int, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val db = dbHelper.writableDatabase
+    db.execSQL("DELETE FROM calender WHERE calender._ID = $id;")
+    db.close()
 }
 
 fun dbDeleteHistory(search: String, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val wdb = dbHelper.writableDatabase
-    wdb.execSQL("DELETE FROM history WHERE history.text = '$search'")
-    wdb.close()
+    val db = dbHelper.writableDatabase
+    db.execSQL("DELETE FROM history WHERE history.text = '$search'")
+    db.close()
 }
 
 fun dbCheck(date: LocalDate, context: Context): Boolean {
     val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.readableDatabase
+    val db = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery(
+        db.rawQuery(
             "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
                     "itemList.isRepeat = 1 OR " +
                     "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
@@ -263,14 +288,15 @@ fun dbCheck(date: LocalDate, context: Context): Boolean {
         return true
     }
     c.close()
+    db.close()
     return false
 }
 
 fun dbHistory(context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.readableDatabase
+    val db = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery("SELECT * FROM history ORDER BY history.time, history._id DESC",
+        db.rawQuery("SELECT * FROM history ORDER BY history.time, history._id DESC",
             null)
     searchItemList.removeAll(searchItemList)
     if (c.count != 0) {
@@ -285,32 +311,34 @@ fun dbHistory(context: Context) {
         }
     }
     c.close()
+    db.close()
 
 }
 
 fun dbAddhistory(search: String, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val wdb = dbHelper.writableDatabase
+    val db = dbHelper.writableDatabase
     val values = ContentValues().apply {
         put(FeedReaderContract.FeedEntry.COLUMN_NAME_text, search)
         put(FeedReaderContract.FeedEntry.COLUMN_NAME_time, LocalDate.now().toString())
     }
     val c: Cursor =
-        wdb.rawQuery("SELECT * FROM history WHERE history.text = '$search'",
+        db.rawQuery("SELECT * FROM history WHERE history.text = '$search'",
             null)
     if (c.count > 0) {
-        wdb.execSQL("DELETE FROM history WHERE history.text = '$search'")
+        db.execSQL("DELETE FROM history WHERE history.text = '$search'")
     }
 
-    val newRowId = wdb?.insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values)
+    val newRowId = db?.insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values)
     c.close()
+    db.close()
 }
 
 fun dbSearch(search: String, context: Context): MutableList<ScheduleItem> {
     val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.readableDatabase
+    val db = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery("SELECT * FROM itemList WHERE (itemList.title LIKE '%$search%') OR (itemList.note LIKE '%$search%') OR (itemList.tag LIKE '%$search%')",
+        db.rawQuery("SELECT * FROM itemList WHERE (itemList.title LIKE '%$search%') OR (itemList.note LIKE '%$search%') OR (itemList.tag LIKE '%$search%')",
             null)
 
     val res = mutableListOf<ScheduleItem>()
@@ -343,15 +371,16 @@ fun dbSearch(search: String, context: Context): MutableList<ScheduleItem> {
         }
     }
     c.close()
+    db.close()
     return res
 
 }
 
 fun dbSelect(date: LocalDate, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
-    val rdb = dbHelper.readableDatabase
+    val db = dbHelper.readableDatabase
     val c: Cursor =
-        rdb.rawQuery(
+        db.rawQuery(
             "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
                     "itemList.isRepeat = 1 OR " +
                     "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
@@ -388,9 +417,40 @@ fun dbSelect(date: LocalDate, context: Context) {
         }
     }
     c.close()
-    rdb.close()
+    db.close()
 }
 
+fun dbSelectCalender(context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val db = dbHelper.readableDatabase
+    val c: Cursor =
+        db.rawQuery(
+            "SELECT * FROM calender",null)
+    calenderItemList.removeAll(calenderItemList)
+    if (c.count != 0) {
+        with(c) {
+            while (moveToNext()) {
+                val item = CalenderItem(id = getString(0).toInt())
+                item.name.value = getString(1).orEmpty()
+                item.color.value = getString(2).orEmpty()
+                calenderItemList.add(item)
+            }
+        }
+    }
+    c.close()
+    db.close()
+}
+
+fun dbAddCalender(name:String,color:String, context: Context) {
+    val dbHelper = FeedReaderDbHelper(context)
+    val db = dbHelper.writableDatabase
+    val values = ContentValues().apply {
+        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_name, name)
+        put(FeedReaderContract.FeedEntry4.COLUMN_NAME_color, color)
+    }
+    val newRowId = db?.insert(FeedReaderContract.FeedEntry4.TABLE_NAME, null, values)
+    db.close()
+}
 /*
 val projection = arrayOf(BaseColumns._ID, FeedReaderContract.FeedEntry.COLUMN_NAME_date)
 val selection = "${FeedReaderContract.FeedEntry.COLUMN_NAME_date} = ?"
