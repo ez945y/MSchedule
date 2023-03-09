@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     rememberSystemUiController().setStatusBarColor(
                         Color.Transparent, darkIcons = MaterialTheme.colorScheme.isLight())
 
-                    //db_ReStart(LocalContext.current)
+                    //dbReStart(LocalContext.current)
                     //auth = Firebase.auth
                     val navController = rememberNavController()
                     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -46,6 +46,10 @@ class MainActivity : ComponentActivity() {
                         scope.launch {
                             drawerState.open()
                         }
+                    }
+                    val context = LocalContext.current
+                    if(calenderItemList.size<1){
+                        dbAddCalender("主行事曆",0xFFDAE2FF, context)
                     }
                     ModalNavigationDrawer(
                         drawerState = drawerState,
@@ -61,7 +65,7 @@ class MainActivity : ComponentActivity() {
                                         launchSingleTop = true
                                     }
                                 }
-                            , context = LocalContext.current)
+                            , context = context)
                         },
 
                         ) {

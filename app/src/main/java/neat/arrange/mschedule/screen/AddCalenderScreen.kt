@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,12 +71,11 @@ fun AddCalenderScreen(calenderItem: CalenderItem = CalenderItem(66), navControll
 
 @Composable
 fun DropDownColor(
-    colorCode: MutableState<String>,
+    colorCode: MutableState<Long>,
     modifier: Modifier,
 ) {
-    val colorItems = listOf("0xFFDAE2FF", "0xFFDAE2FF", "0xFFDAE2FF", "0xFFDAE2FF", "0xFFDAE2FF")
-    val colorNameItems = listOf("藍色", "紅色", "綠色", "紫色", "橘色")
-    val colorName = remember { mutableStateOf("${colorNameItems[0]}") }
+    val colorItems = listOf(0xFFDAE2FF, 0xFFBA1A1A, 0xFF4FD8EB, 0xFFBFC8CA, 0xFFFF9800)
+    val colorNameItems = listOf("紫色", "紅色", "藍色", "灰色", "橘色")
     val expanded = remember { mutableStateOf(false) }
 
     Box(
@@ -86,9 +86,10 @@ fun DropDownColor(
                 expanded.value = true
             }, modifier = Modifier
                 .padding(top = 10.dp)
-                .size(70.dp, 30.dp)
+                .size(70.dp, 30.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(colorCode.value))
         ) {
-            Text(text = colorName.value, fontSize = 8.sp)
+            Text(text = " ", fontSize = 8.sp)
         }
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
@@ -96,7 +97,6 @@ fun DropDownColor(
                 DropdownMenuItem(
                     text = { Text(text = s) },
                     onClick = {
-                        colorName.value = s
                         colorCode.value = colorItems[idx]
                         expanded.value = false
                     }

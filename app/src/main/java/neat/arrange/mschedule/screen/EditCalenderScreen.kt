@@ -30,7 +30,7 @@ fun EditCalenderScreen(id: String = "1", navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally) {
         ElevatedCard(modifier = Modifier
             .padding(top = 200.dp)) {
-            Text(text = "新增行事曆",
+            Text(text = "編輯行事曆",
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -70,6 +70,7 @@ fun EditCalenderScreen(id: String = "1", navController: NavController) {
                 }
                 Button(onClick = {
                     dbReplaceCalender(calenderItem, context)
+                    currentCalender.value = calenderItem.name.value
                     navController.popBackStack()
                 }, modifier = Modifier.padding(start = 15.dp)) {
                     Text(text = "完成編輯")

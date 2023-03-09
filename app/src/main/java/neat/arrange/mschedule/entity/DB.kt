@@ -46,6 +46,7 @@ object FeedReaderContract {
         const val TABLE_NAME = "calender"
         const val COLUMN_NAME_name = "name"
         const val COLUMN_NAME_color = "color"
+
     }
 
 }
@@ -278,11 +279,11 @@ fun dbCheck(date: LocalDate, context: Context): Boolean {
     val db = dbHelper.readableDatabase
     val c: Cursor =
         db.rawQuery(
-            "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
+            "SELECT * FROM itemList WHERE itemList.schedule = '${currentCalender.value}' AND ('$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
                     "itemList.isRepeat = 1 OR " +
                     "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
                     "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR " + // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
-                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate))",
+                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate)))",
             null)
     if (c.count > 0) {
         return true
@@ -338,7 +339,7 @@ fun dbSearch(search: String, context: Context): MutableList<ScheduleItem> {
     val dbHelper = FeedReaderDbHelper(context)
     val db = dbHelper.readableDatabase
     val c: Cursor =
-        db.rawQuery("SELECT * FROM itemList WHERE (itemList.title LIKE '%$search%') OR (itemList.note LIKE '%$search%') OR (itemList.tag LIKE '%$search%')",
+        db.rawQuery("SELECT * FROM itemList WHERE itemList.schedule = '${currentCalender.value}' AND ((itemList.title LIKE '%$search%') OR (itemList.note LIKE '%$search%') OR (itemList.tag LIKE '%$search%'))",
             null)
 
     val res = mutableListOf<ScheduleItem>()
@@ -381,11 +382,11 @@ fun dbSelect(date: LocalDate, context: Context) {
     val db = dbHelper.readableDatabase
     val c: Cursor =
         db.rawQuery(
-            "SELECT * FROM itemList WHERE '$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
+            "SELECT * FROM itemList WHERE itemList.schedule = '${currentCalender.value}' AND ('$date' >= itemList.startDate AND '$date' <= itemList.endDate OR " +
                     "itemList.isRepeat = 1 OR " +
                     "(itemList.isRepeat=2 AND (CAST(julianday('$date') - julianday(itemList.endDate) As Integer) % 7= 0)) OR " +
                     "(itemList.isRepeat=3 AND strftime('%d','$date') = strftime('%d',itemList.endDate)) OR " + // (itemList.isRepeat>0 AND  (('$date' - itemList.endDate ) % 7)= 0) OR
-                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate)) " +
+                    "(itemList.isRepeat=4 AND strftime('%d','$date') = strftime('%d',itemList.endDate) AND strftime('%m','$date') = strftime('%m',itemList.endDate))) " +
                     "ORDER BY itemList.startTime ASC",
             null)
     tempItemList.removeAll(tempItemList)
@@ -432,7 +433,7 @@ fun dbSelectCalender(context: Context) {
             while (moveToNext()) {
                 val item = CalenderItem(id = getString(0).toInt())
                 item.name.value = getString(1).orEmpty()
-                item.color.value = getString(2).orEmpty()
+                item.color.value = getLong(2)
                 calenderItemList.add(item)
             }
         }
@@ -441,7 +442,7 @@ fun dbSelectCalender(context: Context) {
     db.close()
 }
 
-fun dbAddCalender(name:String,color:String, context: Context) {
+fun dbAddCalender(name:String, color: Long, context: Context) {
     val dbHelper = FeedReaderDbHelper(context)
     val db = dbHelper.writableDatabase
     val values = ContentValues().apply {

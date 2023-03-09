@@ -62,6 +62,7 @@ fun EditScreen(
         topBar = {
             MTopBar(onSearchBarClick = { navController.popBackStack() },
                 icon = "c",
+                navController = navController,
                 onButtonClicked = openDrawer)
         },
     ) { contentPadding ->
@@ -260,13 +261,23 @@ fun EditScreen(
                                 .padding(start = 16.dp, top = 22.dp)
                                 .size(18.dp))
                         Spacer(modifier = Modifier.padding(4.dp))
+                        if(idx !=1){
                         TextField(
-                            value = info.value,
+                            value = info.value.toString(),
                             onValueChange = { info.value = it },
                             placeholder = { Text(text = placeholder[idx]) },
                             textStyle = MaterialTheme.typography.titleSmall,
                         )
+                        }else{
+                            DropDownCalender(info, modifier = Modifier.padding(start = 10.dp, top = 15.dp))
+                        }
 
+                    }
+                    if(idx ==1){
+                        Divider(color = MaterialTheme.colorScheme.secondary,
+                            thickness = 1.dp,
+                            modifier = Modifier
+                                .padding(top = 15.dp, start =42.dp,end = 40.dp))
                     }
                 }
             }
@@ -330,7 +341,7 @@ fun EditScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Preview
 @Composable
 fun EditPreview() {
@@ -362,7 +373,9 @@ fun DropDown(
         Button(
             onClick = {
                 expanded.value = true
-            }, modifier = Modifier.padding(top=10.dp).size(70.dp,30.dp)
+            }, modifier = Modifier
+                .padding(top = 10.dp)
+                .size(70.dp, 30.dp)
         ) {
             Text(text = text.value,fontSize = 8.sp)
         }
@@ -401,7 +414,9 @@ fun DropDownNotification(
         Button(
             onClick = {
                 expanded.value = true
-            }, modifier = Modifier.padding(top=10.dp).size(70.dp,30.dp)
+            }, modifier = Modifier
+                .padding(top = 10.dp)
+                .size(70.dp, 30.dp)
         ) {
             Text(text = text.value,fontSize = 8.sp)
         }
@@ -413,6 +428,37 @@ fun DropDownNotification(
                     onClick = {
                         text.value = s
                         data.value = value[idx]
+                        expanded.value = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DropDownCalender(
+    text: MutableState<String>,
+    modifier: Modifier,
+) {
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+
+    Box(
+        modifier = modifier
+    ) {
+        Text(
+            text = if(text.value == ""){
+                currentCalender.value}else{text.value},
+            modifier = Modifier.padding(top = 2.dp,start = 2.dp).clickable {expanded.value = true }
+        )
+        DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
+            calenderItemList.forEach { s ->
+                DropdownMenuItem(
+                    text = { Text(text = s.name.value) },
+                    onClick = {
+                        text.value = s.name.value
                         expanded.value = false
                     }
                 )

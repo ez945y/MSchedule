@@ -65,6 +65,7 @@ fun AddScreen(
         topBar = {
             MTopBar(onSearchBarClick = { navController.popBackStack() },
                 icon = "c",
+                navController = navController,
                 onButtonClicked = openDrawer)
         },
     ) { contentPadding ->
@@ -247,13 +248,22 @@ fun AddScreen(
                                     .padding(start = 16.dp, top = 16.dp)
                                     .size(18.dp))
                             Spacer(modifier = Modifier.padding(4.dp))
-                            TextField(
-                                value = info.value,
-                                onValueChange = { info.value = it },
-                                placeholder = { Text(text = placeholder[idx]) },
-                                textStyle = MaterialTheme.typography.titleSmall,
-                            )
-
+                            if(idx !=1){
+                                TextField(
+                                    value = info.value,
+                                    onValueChange = { info.value = it },
+                                    placeholder = { Text(text = placeholder[idx]) },
+                                    textStyle = MaterialTheme.typography.titleSmall,
+                                )
+                            }else{
+                                DropDownCalender(info, modifier = Modifier.padding(start = 10.dp, top = 15.dp))
+                            }
+                        }
+                        if(idx ==1){
+                            Divider(color = MaterialTheme.colorScheme.secondary,
+                                thickness = 1.dp,
+                                modifier = Modifier
+                                    .padding(top = 15.dp, start =42.dp,end = 40.dp))
                         }
                     }
                 }

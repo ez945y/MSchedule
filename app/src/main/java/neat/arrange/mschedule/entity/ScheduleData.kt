@@ -12,7 +12,8 @@ val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yy/MM/dd", Local
 val formatterGobal: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.TAIWAN)
 val formatterTime: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.TAIWAN)
 val globalDate = mutableStateOf("")
-
+val currentCalender = mutableStateOf("主行事曆")
+val currentIndex = mutableStateOf(0)
 
 var tempItemList = mutableListOf(
     //TODO extract data

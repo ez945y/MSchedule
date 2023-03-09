@@ -10,7 +10,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import neat.arrange.mschedule.R
+import neat.arrange.mschedule.entity.currentIndex
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -19,6 +21,7 @@ fun MTopBar(
     onSearchBarClick: () -> Unit,
     icon: String = "s",
     change:MutableState<Int> = mutableStateOf(1),
+    navController: NavController,
     onButtonClicked: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
@@ -49,7 +52,7 @@ fun MTopBar(
                                 .size(30.dp)
                                 .padding(top = 3.dp))
                     }
-                    IconButton (onClick = { onSearchBarClick() } //do something
+                    IconButton (onClick = { navController.navigate("EditCalender/${currentIndex.value}") } //do something
                             ) {
                         Icon(painterResource(id = R.drawable.setting),
                             null,

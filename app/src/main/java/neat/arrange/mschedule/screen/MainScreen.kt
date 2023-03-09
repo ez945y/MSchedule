@@ -126,7 +126,7 @@ fun MainScreen(
                     SearchScreen(textState) { showAlertDialog = false }
                 }
             } else {
-                MTopBar({ showAlertDialog = true }, "s", change, openDrawer)
+                MTopBar({ showAlertDialog = true }, "s", change,navController, openDrawer)
             }
         },
 

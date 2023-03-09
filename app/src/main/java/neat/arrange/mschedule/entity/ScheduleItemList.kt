@@ -19,7 +19,7 @@ data class ScheduleItem(
     var isAllDay: MutableState<Boolean> = mutableStateOf(false),
     var isRepeat: MutableState<Int> = mutableStateOf(0),
     var member: MutableState<String> = mutableStateOf(""),
-    var schedule: MutableState<String> = mutableStateOf(""),
+    var schedule: MutableState<String> = mutableStateOf(currentCalender.value),
     var tag: MutableState<String> = mutableStateOf(""),
     var note: MutableState<String> = mutableStateOf(""),
     var alarm: MutableState<Int> = mutableStateOf(0),
@@ -60,26 +60,26 @@ class SearchViewModel : ViewModel() { //items: List<ScheduleItem>
 data class CalenderItem(
     var id: Int,
     var name: MutableState<String> = mutableStateOf(""),
-    var color: MutableState<String> = mutableStateOf(""),
+    var color: MutableState<Long> = mutableStateOf(0),
 )
 
 val calenderItemList = mutableListOf(
     CalenderItem(
         id = 1,
         name = mutableStateOf("測試"),
-        color = mutableStateOf("測試"),
+        color = mutableStateOf(0),
     ), CalenderItem(
         id = 2,
         name = mutableStateOf("測試2"),
-        color = mutableStateOf("測試2"),
+        color = mutableStateOf(0),
     ), CalenderItem(
         id = 3,
         name = mutableStateOf("測試3"),
-        color = mutableStateOf("測試3"),
+        color = mutableStateOf(0),
     ), CalenderItem(
         id = 4,
         name = mutableStateOf("測試4"),
-        color = mutableStateOf("測試4"),
+        color = mutableStateOf(0),
     ))
 
 class CalenderViewModel : ViewModel() { //items: List<ScheduleItem>
@@ -88,6 +88,6 @@ class CalenderViewModel : ViewModel() { //items: List<ScheduleItem>
         return calenderItemList.toMutableStateList()
     }
     private val _calenderList = getCalender().toMutableStateList()
-    val searchList: SnapshotStateList<CalenderItem>
+    val calenderList: SnapshotStateList<CalenderItem>
         get() = _calenderList
 }

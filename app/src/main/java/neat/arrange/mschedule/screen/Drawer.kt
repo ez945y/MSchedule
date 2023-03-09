@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -13,15 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import neat.arrange.mschedule.R
-import neat.arrange.mschedule.entity.calenderItemList
-import neat.arrange.mschedule.entity.dbAddCalender
-import neat.arrange.mschedule.entity.dbReStart
-import neat.arrange.mschedule.entity.dbSelectCalender
+import neat.arrange.mschedule.entity.*
 
 sealed class DrawerScreens(val title: String, val route: String) {
     object Main : DrawerScreens("行事曆", "Main")
@@ -70,18 +67,22 @@ fun Drawer(
                 Text("新增", modifier = Modifier.padding(start = 120.dp).clickable {onDestinationClicked(DrawerScreens.AddCalender.route) })
                 Text("清空", modifier = Modifier.padding(start = 10.dp).clickable {showAlertDialog.value = true})
             }
+            val calenderVM = CalenderViewModel()
+            val calenderList = calenderVM.calenderList
             dbSelectCalender(context)
-            if(calenderItemList.size<1){
-                dbAddCalender("Main","0xFFDAE2FF",context)
-            }
+//            val temp = calenderList[0]
+//            calenderList[0] = calenderList[currentIndex.value]
+//            calenderList[currentIndex.value] = temp
             Card(modifier = Modifier.padding(top = 20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)) {
                 LazyRow(modifier = Modifier.fillMaxWidth().padding(10.dp).padding(end=5.dp)) {
-                    itemsIndexed(calenderItemList){ idx,calender ->
+                    itemsIndexed(calenderList){ idx, calender ->
                         Card(modifier = Modifier
                             .padding(5.dp).padding(end=6.dp)
-                            .clickable {onDestinationClicked("EditCalender/${idx}") },
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary)) {
+                            .clickable {
+                                currentCalender.value = calender.name.value
+                                       currentIndex.value = idx}, //calender.color.value.toInt()
+                            colors = CardDefaults.cardColors(containerColor = Color(calender.color.value))) {
                             Text(
                                 calender.name.value,
                                 color = MaterialTheme.colorScheme.background,
